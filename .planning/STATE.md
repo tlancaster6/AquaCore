@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 Phase: 3 of 5 (Calibration and Undistortion)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-18 — Phase 2 complete (2/2 plans, verified)
+Plan: 1 of TBD in current phase
+Status: In progress
+Last activity: 2026-02-18 — 03-01 complete (calibration loader + 25 tests)
 
 Progress: [████░░░░░░] 40%
 
@@ -35,6 +35,7 @@ Progress: [████░░░░░░] 40%
 - Trend: stable to fast (03 was implementation-heavy but well-researched)
 
 *Updated after each plan completion*
+| Phase 03-calibration-and-undistortion P01 | 15 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -61,6 +62,9 @@ Recent decisions affecting current work:
 - [02-02]: Round-trip test uses depth = (point_z - origin_z) / direction_z for reconstruction — no triangulation, single-model, fully deterministic
 - [02-02]: NR convergence validated via re-projection residual (project reconstructed point matches original pixels atol=1e-4) — avoids duplicating residual math in tests
 - [02-02]: Protocol compliance tests are device-agnostic (no device fixture) — isinstance() tests Python structure, not tensor math
+- [Phase 03-calibration-and-undistortion]: water_z stored in InterfaceParams (not separate CalibrationData field) - consistent with Phase 1 types
+- [Phase 03-calibration-and-undistortion]: Bad camera entries skipped with UserWarning (not crash) - resilient loading for partial calibrations
+- [Phase 03-calibration-and-undistortion]: No AquaCal dependency in calibration.py - only json, warnings, torch, pathlib; aquacore stays importable without AquaCal
 
 ### Pending Todos
 
@@ -68,12 +72,12 @@ None.
 
 ### Blockers/Concerns
 
-- [Phase 3]: AquaCal JSON schema field names, shape variants (t: (3,) vs (3,1)), and optional fields must be extracted from AquaCal source before Phase 3 task planning — highest-probability integration risk
 - [Phase 1]: CUDA CI runner availability must be confirmed; device-mismatch and autograd pitfalls only surface reliably on CUDA
 - [Phase 1]: Glass thickness parameter resolved — simplified air-to-water model chosen (no glass layer)
+- [RESOLVED - 03-01]: AquaCal JSON schema field names, shape variants (t: (3,) vs (3,1)), and optional fields — resolved by implementing load_calibration_data with backward compat and shape normalization
 
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-calibration-and-undistortion/03-CONTEXT.md
+Stopped at: Completed 03-01-PLAN.md
+Resume file: .planning/phases/03-calibration-and-undistortion/03-01-SUMMARY.md
