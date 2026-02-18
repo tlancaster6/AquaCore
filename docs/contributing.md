@@ -2,6 +2,10 @@
 
 ## Development Setup
 
+AquaCore requires PyTorch but does not bundle it, so you can choose the build
+that matches your hardware. Install PyTorch into the Hatch environment after
+creating it:
+
 ```bash
 # Clone the repository
 git clone https://github.com/tlancaster6/aquacore.git
@@ -12,6 +16,10 @@ pip install hatch
 
 # Create the default development environment
 hatch env create
+
+# Install PyTorch (pick one)
+hatch run pip install torch                                              # CPU only
+hatch run pip install torch --index-url https://download.pytorch.org/whl/cu124  # CUDA 12.4
 
 # Install pre-commit hooks
 hatch run pre-commit install

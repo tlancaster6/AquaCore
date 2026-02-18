@@ -249,7 +249,7 @@ def test_create_camera_bad_K_shape(device: torch.device) -> None:
     """K with wrong shape should raise ValueError."""
     intrinsics = CameraIntrinsics(
         K=torch.zeros(3, 4, dtype=torch.float32, device=device),
-        dist_coeffs=torch.zeros(5, dtype=torch.float64),
+        dist_coeffs=torch.zeros(5, dtype=torch.float64, device=device),
         image_size=(640, 480),
         is_fisheye=False,
     )

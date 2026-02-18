@@ -4,7 +4,15 @@ Refractive multi-camera geometry foundation for the Aqua ecosystem. Provides sha
 
 ## Installation
 
+AquaCore requires PyTorch but does not bundle it, so you can choose the build that matches your hardware. Install PyTorch first, then AquaCore:
+
 ```bash
+# CPU only
+pip install torch
+pip install aquacore
+
+# CUDA (example: CUDA 12.4 — see https://pytorch.org/get-started for other versions)
+pip install torch --index-url https://download.pytorch.org/whl/cu124
 pip install aquacore
 ```
 
