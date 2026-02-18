@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Correct, tested PyTorch implementations of refractive multi-camera geometry that all Aqua consumers share instead of duplicating.
-**Current focus:** Phase 1 - Foundation and Physics Math
+**Current focus:** Phase 2 - Projection Protocol
 
 ## Current Position
 
-Phase: 1 of 5 (Foundation and Physics Math)
-Plan: 3 of TBD in current phase
-Status: In progress
-Last activity: 2026-02-18 — Completed Plan 03 (Snell's law, refractive ray tracing, Newton-Raphson projection, triangulation)
+Phase: 2 of 5 (Projection Protocol)
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-02-18 — Phase 1 complete (3/3 plans, verified)
 
-Progress: [███░░░░░░░] ~15%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
@@ -71,5 +71,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed Phase 1, Plan 03 (01-03-PLAN.md)
-Resume file: .planning/phases/01-foundation-and-physics-math/01-04-PLAN.md
+Stopped at: Phase 1 complete, verified, ready for Phase 2
+Resume file: .planning/ROADMAP.md
