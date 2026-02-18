@@ -95,8 +95,31 @@ def test_pinhole_pixel_to_ray(device: torch.device) -> None:
     torch.testing.assert_close(rays.cpu(), expected, atol=1e-5, rtol=0)
 
 
+def _stable_angle(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
+    """Numerically stable angle between unit vectors using atan2(|cross|, dot).
+
+    Unlike acos(dot), this is numerically stable for small angles where float32
+    acos suffers from catastrophic cancellation near 1.0.
+
+    Args:
+        a: Unit vectors, shape (N, 3), float32.
+        b: Unit vectors, shape (N, 3), float32.
+
+    Returns:
+        Angles in radians, shape (N,).
+    """
+    cross = torch.linalg.cross(a, b)  # (N, 3)
+    cross_norm = cross.norm(dim=-1)  # (N,)
+    dot = (a * b).sum(dim=-1)  # (N,)
+    return torch.atan2(cross_norm, dot)  # (N,)
+
+
 def test_pinhole_round_trip(device: torch.device) -> None:
-    """Project then back-project should recover original ray direction to 1e-5 rad."""
+    """Project then back-project should recover original ray direction to 1e-5 rad.
+
+    Uses atan2(|cross|, dot) for numerically stable angle measurement since
+    acos(dot) suffers from float32 catastrophic cancellation near 1.0.
+    """
     cam = create_camera(_pinhole_intrinsics(device), _identity_extrinsics(device))
     points = torch.tensor([[1.0, 2.0, 5.0]], dtype=torch.float32, device=device)
     pixels, valid = cam.project(points)
@@ -106,12 +129,9 @@ def test_pinhole_round_trip(device: torch.device) -> None:
 
     # Expected direction: from camera center (origin) toward the point
     expected_dir = points / points.norm(dim=1, keepdim=True)
-    expected_dir_cpu = expected_dir.cpu()
-    rays_cpu = rays.cpu()
 
-    # Angle between ray and expected direction must be < 1e-5 radians
-    cos_angle = (rays_cpu * expected_dir_cpu).sum(dim=1).clamp(-1.0, 1.0)
-    angle = torch.acos(cos_angle)
+    # Stable angle: atan2(|cross|, dot) avoids float32 acos precision loss near 1.0
+    angle = _stable_angle(rays.cpu(), expected_dir.cpu())
     assert angle.item() < 1e-5, f"Round-trip angle error: {angle.item():.2e} rad"
 
 
@@ -135,8 +155,7 @@ def test_pinhole_with_distortion(device: torch.device) -> None:
     rays = cam.pixel_to_ray(pixels)
 
     expected_dir = points / points.norm(dim=1, keepdim=True)
-    cos_angle = (rays.cpu() * expected_dir.cpu()).sum(dim=1).clamp(-1.0, 1.0)
-    angle = torch.acos(cos_angle)
+    angle = _stable_angle(rays.cpu(), expected_dir.cpu())
     assert angle.item() < 1e-4, (
         f"Distorted round-trip angle error: {angle.item():.2e} rad"
     )
@@ -176,8 +195,7 @@ def test_fisheye_round_trip(device: torch.device) -> None:
     rays = cam.pixel_to_ray(pixels)
 
     expected_dir = points / points.norm(dim=1, keepdim=True)
-    cos_angle = (rays.cpu() * expected_dir.cpu()).sum(dim=1).clamp(-1.0, 1.0)
-    angle = torch.acos(cos_angle)
+    angle = _stable_angle(rays.cpu(), expected_dir.cpu())
     assert angle.item() < 1e-4, (
         f"Fisheye round-trip angle error: {angle.item():.2e} rad"
     )
