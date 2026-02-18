@@ -115,13 +115,54 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated during roadmap creation) | | |
+| TYPE-01 | Phase 1 | Pending |
+| TYPE-02 | Phase 1 | Pending |
+| TYPE-03 | Phase 1 | Pending |
+| TYPE-04 | Phase 1 | Pending |
+| TYPE-05 | Phase 1 | Pending |
+| CAM-01 | Phase 1 | Pending |
+| CAM-02 | Phase 1 | Pending |
+| CAM-03 | Phase 1 | Pending |
+| CAM-04 | Phase 1 | Pending |
+| CAM-05 | Phase 1 | Pending |
+| CAM-06 | Phase 1 | Pending |
+| REF-01 | Phase 1 | Pending |
+| REF-02 | Phase 1 | Pending |
+| REF-03 | Phase 1 | Pending |
+| REF-04 | Phase 1 | Pending |
+| REF-05 | Phase 1 | Pending |
+| REF-06 | Phase 1 | Pending |
+| REF-07 | Phase 1 | Pending |
+| TRN-01 | Phase 1 | Pending |
+| TRN-02 | Phase 1 | Pending |
+| TRN-03 | Phase 1 | Pending |
+| TRN-04 | Phase 1 | Pending |
+| TRI-01 | Phase 1 | Pending |
+| TRI-02 | Phase 1 | Pending |
+| TRI-03 | Phase 1 | Pending |
+| QA-01 | Phase 1 | Pending |
+| QA-02 | Phase 1 | Pending |
+| PRJ-01 | Phase 2 | Pending |
+| PRJ-02 | Phase 2 | Pending |
+| PRJ-03 | Phase 2 | Pending |
+| PRJ-04 | Phase 2 | Pending |
+| CAL-01 | Phase 3 | Pending |
+| CAL-02 | Phase 3 | Pending |
+| CAL-03 | Phase 3 | Pending |
+| CAL-04 | Phase 3 | Pending |
+| IO-01 | Phase 4 | Pending |
+| IO-02 | Phase 4 | Pending |
+| IO-03 | Phase 4 | Pending |
+| IO-04 | Phase 4 | Pending |
+| QA-03 | Phase 5 | Pending |
+| QA-04 | Phase 5 | Pending |
+| QA-05 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 33 total
-- Mapped to phases: 0
-- Unmapped: 33 ⚠️
+- Mapped to phases: 33
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-18*
-*Last updated: 2026-02-18 after initial definition*
+*Last updated: 2026-02-18 after roadmap creation*
