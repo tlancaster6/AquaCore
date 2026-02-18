@@ -2,6 +2,7 @@
 
 from importlib.metadata import PackageNotFoundError, version
 
+from .camera import create_camera
 from .interface import ray_plane_intersection
 from .transforms import (
     camera_center,
@@ -30,6 +31,7 @@ __all__ = [
     "Vec3",
     "camera_center",
     "compose_poses",
+    "create_camera",
     "invert_pose",
     "matrix_to_rvec",
     "ray_plane_intersection",
