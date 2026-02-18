@@ -35,6 +35,7 @@ from .types import (
     Vec2,
     Vec3,
 )
+from .undistortion import compute_undistortion_maps, undistort_image
 
 __all__ = [
     "INTERFACE_NORMAL",
@@ -51,6 +52,7 @@ __all__ = [
     "back_project_multi",
     "camera_center",
     "compose_poses",
+    "compute_undistortion_maps",
     "create_camera",
     "invert_pose",
     "load_calibration_data",
@@ -65,6 +67,7 @@ __all__ = [
     "trace_ray_air_to_water",
     "trace_ray_water_to_air",
     "triangulate_rays",
+    "undistort_image",
 ]
 
 try:
