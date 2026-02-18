@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 Phase: 1 of 5 (Foundation and Physics Math)
-Plan: 2 of TBD in current phase
+Plan: 3 of TBD in current phase
 Status: In progress
-Last activity: 2026-02-18 — Completed Plan 02 (camera models: pinhole, fisheye, create_camera factory)
+Last activity: 2026-02-18 — Completed Plan 03 (Snell's law, refractive ray tracing, Newton-Raphson projection, triangulation)
 
-Progress: [██░░░░░░░░] ~10%
+Progress: [███░░░░░░░] ~15%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 27.5 min
-- Total execution time: 0.9 hours
+- Total plans completed: 3
+- Average duration: 22 min
+- Total execution time: 1.0 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-and-physics-math | 2 | 55 min | 27.5 min |
+| 01-foundation-and-physics-math | 3 | 65 min | 22 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (25 min), 01-02 (30 min)
-- Trend: stable
+- Last 5 plans: 01-01 (25 min), 01-02 (30 min), 01-03 (10 min)
+- Trend: stable to fast (03 was implementation-heavy but well-researched)
 
 *Updated after each plan completion*
 
@@ -53,6 +53,10 @@ Recent decisions affecting current work:
 - [01-02]: OpenCV boundary: always cpu().numpy() before cv2 calls, .to(device) after — documented as non-differentiable in class docstrings
 - [01-02]: atan2(|cross|, dot) for round-trip angle tests — float32 acos gives ~4.88e-4 rad noise near 1.0 even for bit-identical rays; atan2 returns exact 0.0
 - [01-02]: create_camera() is sole public constructor — _PinholeCamera/_FisheyeCamera prefixed _ and not re-exported
+- [01-03]: snells_law_3d orients normal internally by checking sign of cos_i — callers do not pre-orient for air→water vs water→air
+- [01-03]: TIR returns (zeros, False) per (output, valid_mask) pattern — consistent with AquaMVS; not None (AquaCal pattern)
+- [01-03]: refractive_project returns (N, 3) interface point — caller projects via camera model to get pixel (two-step, matches AquaMVS)
+- [01-03]: TRI-03 integration uses refractive_project to find Snell's-law-correct interface points — direct line-of-sight fails due to refraction bending
 
 ### Pending Todos
 
@@ -63,10 +67,9 @@ None.
 - [Phase 3]: AquaCal JSON schema field names, shape variants (t: (3,) vs (3,1)), and optional fields must be extracted from AquaCal source before Phase 3 task planning — highest-probability integration risk
 - [Phase 1]: CUDA CI runner availability must be confirmed; device-mismatch and autograd pitfalls only surface reliably on CUDA
 - [Phase 1]: Glass thickness parameter resolved — simplified air-to-water model chosen (no glass layer)
-- [Phase 1]: Two pre-existing test failures in scaffolded test_refraction.py and test_triangulation.py — to be fixed in plans 03/04
 
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed Phase 1, Plan 02 (01-02-PLAN.md)
-Resume file: .planning/phases/01-foundation-and-physics-math/01-03-PLAN.md
+Stopped at: Completed Phase 1, Plan 03 (01-03-PLAN.md)
+Resume file: .planning/phases/01-foundation-and-physics-math/01-04-PLAN.md
