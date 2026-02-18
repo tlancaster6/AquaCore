@@ -154,3 +154,14 @@ Each task was committed atomically:
 
 *Phase: 01-foundation-and-physics-math*
 *Completed: 2026-02-18*
+
+## Self-Check: PASSED
+
+- src/aquacore/refraction.py: FOUND
+- src/aquacore/triangulation.py: FOUND
+- tests/unit/test_refraction.py: FOUND
+- tests/unit/test_triangulation.py: FOUND
+- src/aquacore/__init__.py: FOUND
+- c64e393 (feat Task 1): FOUND
+- 382a87c (test Task 2): FOUND
+- ff3ec6e (docs metadata): FOUND
