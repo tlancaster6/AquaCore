@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 Phase: 1 of 5 (Foundation and Physics Math)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-18 — Roadmap created; ready to plan Phase 1
+Plan: 1 of TBD in current phase
+Status: In progress
+Last activity: 2026-02-18 — Completed Plan 01 (types, transforms, interface, conftest)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] ~5%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: 0 hours
+- Total plans completed: 1
+- Average duration: 25 min
+- Total execution time: 0.4 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01-foundation-and-physics-math | 1 | 25 min | 25 min |
 
 **Recent Trend:**
-- Last 5 plans: -
-- Trend: -
+- Last 5 plans: 01-01 (25 min)
+- Trend: baseline established
 
 *Updated after each plan completion*
 
@@ -46,10 +46,14 @@ Recent decisions affecting current work:
 - [Init]: Standalone tests only (no AquaCal oracle) — known-value tests, no test-time coupling
 - [Init]: Datasets deferred to v2 — keeps v1 focused on geometry foundation
 - [Init]: Rewiring guide, not rewiring — AquaCore ships independently
+- [01-01]: Pure-PyTorch Rodrigues (not cv2.Rodrigues) — device-agnostic, autograd-compatible, handles theta=0 and theta=pi edge cases
+- [01-01]: dist_coeffs stored as float64 (OpenCV requirement); K as float32 (AquaMVS convention)
+- [01-01]: (output, valid_mask) return pattern for functions that can fail on individual elements (no NaN, no None)
+- [01-01]: conftest.py at tests/ root (not tests/unit/) — shared by all test subdirectories
 
 ### Pending Todos
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
@@ -60,5 +64,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-foundation-and-physics-math/01-CONTEXT.md
+Stopped at: Completed Phase 1, Plan 01 (01-01-PLAN.md)
+Resume file: .planning/phases/01-foundation-and-physics-math/01-02-PLAN.md
