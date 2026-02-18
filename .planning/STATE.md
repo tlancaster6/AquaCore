@@ -55,10 +55,10 @@ None yet.
 
 - [Phase 3]: AquaCal JSON schema field names, shape variants (t: (3,) vs (3,1)), and optional fields must be extracted from AquaCal source before Phase 3 task planning — highest-probability integration risk
 - [Phase 1]: CUDA CI runner availability must be confirmed; device-mismatch and autograd pitfalls only surface reliably on CUDA
-- [Phase 1]: Glass thickness parameter for InterfaceParams (full air→glass→water chain) needs default and valid range decided before implementation
+- [Phase 1]: Glass thickness parameter resolved — simplified air-to-water model chosen (no glass layer)
 
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Roadmap created, STATE.md initialized — next step is /gsd:plan-phase 1
-Resume file: None
+Stopped at: Phase 1 context gathered
+Resume file: .planning/phases/01-foundation-and-physics-math/01-CONTEXT.md
