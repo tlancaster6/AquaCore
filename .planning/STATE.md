@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-18)
 ## Current Position
 
 Phase: 1 of 5 (Foundation and Physics Math)
-Plan: 1 of TBD in current phase
+Plan: 2 of TBD in current phase
 Status: In progress
-Last activity: 2026-02-18 — Completed Plan 01 (types, transforms, interface, conftest)
+Last activity: 2026-02-18 — Completed Plan 02 (camera models: pinhole, fisheye, create_camera factory)
 
-Progress: [█░░░░░░░░░] ~5%
+Progress: [██░░░░░░░░] ~10%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 25 min
-- Total execution time: 0.4 hours
+- Total plans completed: 2
+- Average duration: 27.5 min
+- Total execution time: 0.9 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-and-physics-math | 1 | 25 min | 25 min |
+| 01-foundation-and-physics-math | 2 | 55 min | 27.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (25 min)
-- Trend: baseline established
+- Last 5 plans: 01-01 (25 min), 01-02 (30 min)
+- Trend: stable
 
 *Updated after each plan completion*
 
@@ -50,6 +50,9 @@ Recent decisions affecting current work:
 - [01-01]: dist_coeffs stored as float64 (OpenCV requirement); K as float32 (AquaMVS convention)
 - [01-01]: (output, valid_mask) return pattern for functions that can fail on individual elements (no NaN, no None)
 - [01-01]: conftest.py at tests/ root (not tests/unit/) — shared by all test subdirectories
+- [01-02]: OpenCV boundary: always cpu().numpy() before cv2 calls, .to(device) after — documented as non-differentiable in class docstrings
+- [01-02]: atan2(|cross|, dot) for round-trip angle tests — float32 acos gives ~4.88e-4 rad noise near 1.0 even for bit-identical rays; atan2 returns exact 0.0
+- [01-02]: create_camera() is sole public constructor — _PinholeCamera/_FisheyeCamera prefixed _ and not re-exported
 
 ### Pending Todos
 
@@ -60,9 +63,10 @@ None.
 - [Phase 3]: AquaCal JSON schema field names, shape variants (t: (3,) vs (3,1)), and optional fields must be extracted from AquaCal source before Phase 3 task planning — highest-probability integration risk
 - [Phase 1]: CUDA CI runner availability must be confirmed; device-mismatch and autograd pitfalls only surface reliably on CUDA
 - [Phase 1]: Glass thickness parameter resolved — simplified air-to-water model chosen (no glass layer)
+- [Phase 1]: Two pre-existing test failures in scaffolded test_refraction.py and test_triangulation.py — to be fixed in plans 03/04
 
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed Phase 1, Plan 01 (01-01-PLAN.md)
-Resume file: .planning/phases/01-foundation-and-physics-math/01-02-PLAN.md
+Stopped at: Completed Phase 1, Plan 02 (01-02-PLAN.md)
+Resume file: .planning/phases/01-foundation-and-physics-math/01-03-PLAN.md
