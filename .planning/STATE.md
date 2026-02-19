@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Correct, tested PyTorch implementations of refractive multi-camera geometry that all Aqua consumers share instead of duplicating.
-**Current focus:** Phase 3 - Calibration and Undistortion
+**Current focus:** Phase 4 - I/O Layer
 
 ## Current Position
 
-Phase: 3 of 5 (Calibration and Undistortion)
-Plan: 2 of TBD in current phase
+Phase: 4 of 5 (I/O Layer)
+Plan: 1 of TBD in current phase
 Status: In progress
-Last activity: 2026-02-18 — 03-02 complete (undistortion pipeline + 13 tests)
+Last activity: 2026-02-18 — 04-01 complete (FrameSet Protocol + ImageSet + 15 tests)
 
 Progress: [█████░░░░░] 50%
 
@@ -37,6 +37,7 @@ Progress: [█████░░░░░] 50%
 *Updated after each plan completion*
 | Phase 03-calibration-and-undistortion P01 | 15 | 2 tasks | 3 files |
 | Phase 03-calibration-and-undistortion P02 | 15 | 2 tasks | 3 files |
+| Phase 04-i-o-layer P01 | 25 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,9 @@ Recent decisions affecting current work:
 - [03-02]: Return raw (map_x, map_y) NumPy tuple from compute_undistortion_maps — no UndistortionData wrapper; minimal API surface
 - [03-02]: dist_coeffs reshaped to (4,1) for fisheye path — cv2.fisheye requires column vector; reshape is internal to undistortion.py
 - [03-02]: image_size from CameraIntrinsics (width, height) passed directly to OpenCV — both conventions match, no swap needed
+- [Phase 04-i-o-layer]: FrameSet is runtime_checkable Protocol with 5 methods; ImageSet does NOT inherit — structural typing only
+- [Phase 04-i-o-layer]: BGR-to-RGB: bgr[..., ::-1].copy() required before torch.from_numpy (negative stride incompatible)
+- [Phase 04-i-o-layer]: Glob deduplication via seen-dict by filename: prevents double-counting on case-insensitive filesystems (Windows)
 
 ### Pending Todos
 
@@ -83,5 +87,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Phase 4 context gathered
-Resume file: .planning/phases/04-i-o-layer/04-CONTEXT.md
+Stopped at: Completed 04-01-PLAN.md (FrameSet + ImageSet)
+Resume file: .planning/phases/04-i-o-layer/04-02-PLAN.md
