@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Correct, tested PyTorch implementations of refractive multi-camera geometry that all Aqua consumers share instead of duplicating.
-**Current focus:** Phase 4 - I/O Layer
+**Current focus:** Phase 5 - Packaging and Release
 
 ## Current Position
 
-Phase: 4 of 5 (I/O Layer)
-Plan: 2 of 2 in current phase (COMPLETE)
-Status: Phase 4 complete
-Last activity: 2026-02-19 — 04-02 complete (VideoSet + create_frameset + 19 tests, 226 total)
+Phase: 5 of 5 (Packaging and Release)
+Plan: 3 of 3 in current phase (COMPLETE)
+Status: Phase 5 complete (plan 05-02 is a human-action plan requiring GitHub/PyPI setup)
+Last activity: 2026-02-18 — 05-03 complete (rewiring guide, 315 lines, 34 exports covered)
 
-Progress: [██████░░░░] 60%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 22 min
-- Total execution time: 1.0 hours
+- Total plans completed: 6 (phases 1-4) + 2 (phase 5 auto-plans)
+- Average duration: ~20 min
+- Total execution time: ~2.5 hours
 
 **By Phase:**
 
@@ -39,6 +39,8 @@ Progress: [██████░░░░] 60%
 | Phase 03-calibration-and-undistortion P02 | 15 | 2 tasks | 3 files |
 | Phase 04-i-o-layer P01 | 25 | 2 tasks | 5 files |
 | Phase 04-i-o-layer P02 | 6 | 2 tasks | 7 files |
+| Phase 05-packaging-and-release P01 | 20 | 2 tasks | 2 files |
+| Phase 05-packaging-and-release P03 | 20 | 2 tasks | 1 file |
 
 ## Accumulated Context
 
@@ -77,6 +79,9 @@ Recent decisions affecting current work:
 - [Phase 04-i-o-layer]: VideoSet does NOT inherit from FrameSet: structural typing only (same as ImageSet)
 - [Phase 04-i-o-layer]: VideoSet __iter__ resets all captures to frame 0 at start: guarantees frame-exact sequential read
 - [Phase 04-i-o-layer]: create_frameset uses filesystem existence check first, then extension inference for nonexistent paths
+- [05-03]: Rewiring guide structured by consumer (AquaCal section / AquaMVS section) — allows each team to navigate directly to their section
+- [05-03]: AquaMVS section has no Signature Changes subsection — all 8 AquaMVS ports are pure path migrations (identical signatures)
+- [05-03]: Deprecated AquaCal shims (refractive_project_fast, refractive_project_fast_batch) listed as "removed" in guide — explicitly flags removal
 
 ### Pending Todos
 
@@ -87,9 +92,10 @@ None.
 - [Phase 1]: CUDA CI runner availability must be confirmed; device-mismatch and autograd pitfalls only surface reliably on CUDA
 - [Phase 1]: Glass thickness parameter resolved — simplified air-to-water model chosen (no glass layer)
 - [RESOLVED - 03-01]: AquaCal JSON schema field names, shape variants (t: (3,) vs (3,1)), and optional fields — resolved by implementing load_calibration_data with backward compat and shape normalization
+- [05-02 - HUMAN ACTION REQUIRED]: Plan 05-02 requires GitHub repository configuration (branch protection, Codecov token, PyPI trusted publisher). See .planning/phases/05-packaging-and-release/05-02-PLAN.md for required manual steps.
 
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-packaging-and-release/05-CONTEXT.md
+Stopped at: Completed 05-03-PLAN.md (rewiring guide written)
+Resume file: .planning/phases/05-packaging-and-release/05-02-PLAN.md
