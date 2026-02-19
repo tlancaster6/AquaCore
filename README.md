@@ -32,6 +32,9 @@ calib = load_calibration_data("path/to/aquacal.json")
 ## Development
 
 ```bash
+# Install PyTorch first (CPU example; see https://pytorch.org for CUDA builds)
+pip install torch
+
 # Set up the development environment
 pip install hatch
 hatch env create
