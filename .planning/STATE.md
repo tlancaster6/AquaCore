@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-18)
 
 **Core value:** Correct, tested PyTorch implementations of refractive multi-camera geometry that all Aqua consumers share instead of duplicating.
-**Current focus:** Phase 5 - Packaging and Release
+**Current focus:** Phase 6 - Tech Debt Cleanup
 
 ## Current Position
 
-Phase: 5 of 5 (Packaging and Release)
-Plan: 3 of 3 in current phase (COMPLETE)
-Status: Phase 5 complete (plan 05-02 is a human-action plan requiring GitHub/PyPI setup)
-Last activity: 2026-02-18 — 05-03 complete (rewiring guide, 315 lines, 34 exports covered)
+Phase: 6 of 6 (Tech Debt Cleanup)
+Plan: 1 of 1 in current phase (COMPLETE)
+Status: Phase 6 complete - all tech debt items resolved
+Last activity: 2026-02-18 — 06-01 complete (README PyTorch note, Snell's law dedup, empty dir cleanup)
 
 Progress: [██████████] 100%
 
@@ -42,6 +42,7 @@ Progress: [██████████] 100%
 | Phase 05-packaging-and-release P01 | 20 | 2 tasks | 2 files |
 | Phase 05-packaging-and-release P03 | 20 | 2 tasks | 1 file |
 | Phase 05-packaging-and-release P01 | 5 | 2 tasks | 3 files |
+| Phase 06-tech-debt-cleanup P01 | 5 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -100,5 +101,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 05-01-PLAN.md (basedpyright standard + CI validation)
-Resume file: .planning/phases/05-packaging-and-release/05-02-PLAN.md
+Stopped at: Completed 06-01-PLAN.md (tech debt cleanup - all items resolved)
+Resume file: None (all phases complete)
