@@ -41,6 +41,7 @@ Progress: [██████████] 100%
 | Phase 04-i-o-layer P02 | 6 | 2 tasks | 7 files |
 | Phase 05-packaging-and-release P01 | 20 | 2 tasks | 2 files |
 | Phase 05-packaging-and-release P03 | 20 | 2 tasks | 1 file |
+| Phase 05-packaging-and-release P01 | 5 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,8 @@ Recent decisions affecting current work:
 - [05-03]: Rewiring guide structured by consumer (AquaCal section / AquaMVS section) — allows each team to navigate directly to their section
 - [05-03]: AquaMVS section has no Signature Changes subsection — all 8 AquaMVS ports are pure path migrations (identical signatures)
 - [05-03]: Deprecated AquaCal shims (refractive_project_fast, refractive_project_fast_batch) listed as "removed" in guide — explicitly flags removal
+- [Phase 05-packaging-and-release]: basedpyright standard mode: 0 errors with no source changes needed - existing codebase already compliant
+- [Phase 05-packaging-and-release]: PyTorch installed into hatch env via hatch run pip install (not system pip) - hatch venvs are isolated and don't inherit system packages
 
 ### Pending Todos
 
@@ -97,5 +100,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 05-03-PLAN.md (rewiring guide written)
+Stopped at: Completed 05-01-PLAN.md (basedpyright standard + CI validation)
 Resume file: .planning/phases/05-packaging-and-release/05-02-PLAN.md
