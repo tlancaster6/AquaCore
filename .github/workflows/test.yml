@@ -31,11 +31,11 @@ jobs:
       - name: Install Hatch
         run: pip install hatch
 
-      - name: Install PyTorch (CPU)
-        run: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-
       - name: Create environment
         run: hatch env create
+
+      - name: Install PyTorch (CPU)
+        run: hatch run pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
       - name: Run tests
         run: hatch run test -- --cov --cov-report=xml --cov-report=term
@@ -60,8 +60,11 @@ jobs:
       - name: Install Hatch
         run: pip install hatch
 
+      - name: Create environment
+        run: hatch env create
+
       - name: Install PyTorch (CPU)
-        run: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+        run: hatch run pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
       - name: Run type checker
         run: hatch run typecheck
