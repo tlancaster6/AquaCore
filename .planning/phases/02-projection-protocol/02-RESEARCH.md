@@ -2,7 +2,7 @@
 
 **Researched:** 2026-02-18
 **Domain:** PyTorch Protocol design, refractive projection model, Newton-Raphson back-projection
-**Confidence:** HIGH — research drawn directly from AquaMVS and AquaCore source code on this machine
+**Confidence:** HIGH — research drawn directly from AquaMVS and AquaKit source code on this machine
 
 ---
 
@@ -51,7 +51,7 @@ None — discussion stayed within phase scope
 
 ## Summary
 
-Phase 2 implements the `ProjectionModel` protocol and `RefractiveProjectionModel` class in `src/aquacore/projection/`. The implementation is a direct adaptation of the AquaMVS `projection/` subpackage with one deliberate rename: `cast_ray()` becomes `back_project()` to form a symmetric pair with `project()`. Everything else — the Newton-Raphson algorithm, validity masking, `.to(device)` semantics, `@runtime_checkable` Protocol, precomputed derived quantities — is ported directly from the verified AquaMVS source.
+Phase 2 implements the `ProjectionModel` protocol and `RefractiveProjectionModel` class in `src/aquakit/projection/`. The implementation is a direct adaptation of the AquaMVS `projection/` subpackage with one deliberate rename: `cast_ray()` becomes `back_project()` to form a symmetric pair with `project()`. Everything else — the Newton-Raphson algorithm, validity masking, `.to(device)` semantics, `@runtime_checkable` Protocol, precomputed derived quantities — is ported directly from the verified AquaMVS source.
 
 Phase 1 already delivered the two functions that `RefractiveProjectionModel` builds on: `refractive_project()` (Newton-Raphson, finds interface point) and `refractive_back_project()` (ray tracing, uses `trace_ray_air_to_water()`). The Phase 2 class is a thin stateful wrapper that holds camera parameters, precomputes K_inv and C, and delegates math to those Phase 1 functions. The forward `project()` calls `refractive_project()` then does a pinhole projection of the interface point. The `back_project()` does K_inv back-projection then calls `refractive_back_project()`.
 
@@ -96,7 +96,7 @@ The new element unique to Phase 2 is the `from_camera()` factory method and the 
 Phase 2 fills these two files (stubs already exist from project scaffold):
 
 ```
-src/aquacore/projection/
+src/aquakit/projection/
 ├── __init__.py       # Export ProjectionModel, RefractiveProjectionModel
 ├── protocol.py       # @runtime_checkable class ProjectionModel(Protocol)
 └── refractive.py     # RefractiveProjectionModel + project_multi + back_project_multi
@@ -186,7 +186,7 @@ class RefractiveProjectionModel:
 **Key detail:** The camera objects (`_PinholeCamera | _FisheyeCamera`) store K, R, t as attributes. The factory extracts these plus `InterfaceParams.water_z`, `InterfaceParams.normal`, `InterfaceParams.n_air`, `InterfaceParams.n_water`.
 
 ```python
-# Source: AquaCore Phase 1 camera.py + types.py (interfaces researched)
+# Source: AquaKit Phase 1 camera.py + types.py (interfaces researched)
 from typing import TYPE_CHECKING
 from ..types import InterfaceParams
 
@@ -271,7 +271,7 @@ def back_project(self, pixels: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor
     return origins, directions
 ```
 
-**Note on inline vs delegation:** AquaMVS inlines Snell's law directly in `cast_ray()` rather than calling `snells_law_3d()`. This is because the AquaMVS implementation predates Phase 1 extraction of the standalone function. For AquaCore Phase 2, consider whether to inline (faster, no function call) or delegate to `refractive_back_project()` (less duplication). Recommendation: delegate to `refractive_back_project()` from Phase 1 for code reuse, since back_project is not on the performance-critical path in typical usage.
+**Note on inline vs delegation:** AquaMVS inlines Snell's law directly in `cast_ray()` rather than calling `snells_law_3d()`. This is because the AquaMVS implementation predates Phase 1 extraction of the standalone function. For AquaKit Phase 2, consider whether to inline (faster, no function call) or delegate to `refractive_back_project()` (less duplication). Recommendation: delegate to `refractive_back_project()` from Phase 1 for code reuse, since back_project is not on the performance-critical path in typical usage.
 
 However, note that `refractive_back_project()` has a slightly different API: it takes `pixel_rays` (already in world frame) not raw pixels. So the sequence is:
 1. `K_inv` back-project pixels to camera-frame rays
@@ -339,12 +339,12 @@ def back_project_multi(
 
 ### Pattern 8: __init__.py Export
 
-**What:** `projection/__init__.py` must export `ProjectionModel` and `RefractiveProjectionModel` (plus `project_multi`, `back_project_multi`). The top-level `aquacore/__init__.py` should also re-export these for the public API.
+**What:** `projection/__init__.py` must export `ProjectionModel` and `RefractiveProjectionModel` (plus `project_multi`, `back_project_multi`). The top-level `aquakit/__init__.py` should also re-export these for the public API.
 
 **Source:** AquaMVS `projection/__init__.py` — verified direct reference.
 
 ```python
-# src/aquacore/projection/__init__.py
+# src/aquakit/projection/__init__.py
 """Projection models for camera-to-pixel and pixel-to-ray mapping."""
 
 from .protocol import ProjectionModel
@@ -365,7 +365,7 @@ __all__ = [
 ### Recommended Project Structure
 
 ```
-src/aquacore/projection/
+src/aquakit/projection/
 ├── __init__.py       # ProjectionModel, RefractiveProjectionModel, project_multi, back_project_multi
 ├── protocol.py       # @runtime_checkable ProjectionModel Protocol
 └── refractive.py     # RefractiveProjectionModel class + module-level multi-camera helpers
@@ -433,9 +433,9 @@ src/aquacore/projection/
 
 **Why it happens:** The factory method needs raw tensors from the camera object.
 
-**How to avoid:** These attributes ARE accessed in AquaMVS calibration loading (`.K`, `.R`, `.t` are read directly from `CameraData`). For AquaCore, `from_camera()` is in the same package, and the internal classes expose K, R, t publicly on their instances (they are plain attributes, not name-mangled). Document that `from_camera()` relies on these attributes being present on the camera object.
+**How to avoid:** These attributes ARE accessed in AquaMVS calibration loading (`.K`, `.R`, `.t` are read directly from `CameraData`). For AquaKit, `from_camera()` is in the same package, and the internal classes expose K, R, t publicly on their instances (they are plain attributes, not name-mangled). Document that `from_camera()` relies on these attributes being present on the camera object.
 
-**Alternative:** The camera instances (`_PinholeCamera`) hold `self.K`, `self.R`, `self.t` as regular attributes (verified in camera.py line 39-41). Access is fine from within the aquacore package.
+**Alternative:** The camera instances (`_PinholeCamera`) hold `self.K`, `self.R`, `self.t` as regular attributes (verified in camera.py line 39-41). Access is fine from within the aquakit package.
 
 ### Pitfall 5: back_project() Protocol Compliance Test Needs Both Methods
 
@@ -453,7 +453,7 @@ src/aquacore/projection/
 
 **Why it happens:** NaN propagates through arithmetic silently.
 
-**How to avoid:** Document clearly that `project_multi()` returns a parallel valid mask. Callers must use valid mask before processing pixels. This matches the existing AquaCore convention from Phase 1.
+**How to avoid:** Document clearly that `project_multi()` returns a parallel valid mask. Callers must use valid mask before processing pixels. This matches the existing AquaKit convention from Phase 1.
 
 ---
 
@@ -663,13 +663,13 @@ def test_newton_raphson_residual_below_tolerance(model, device):
 
 | Old Approach | Current Approach | When Changed | Impact |
 |--------------|------------------|--------------|--------|
-| `cast_ray()` (AquaMVS) | `back_project()` (AquaCore) | Phase 2 rename | Symmetric naming with `project()`; consistent with Phase 1 `camera.pixel_to_ray()` → `RefractiveProjectionModel.back_project()` distinction |
-| No multi-camera helpers (AquaMVS) | `project_multi()`, `back_project_multi()` (AquaCore) | Phase 2 addition | Callers don't need to write their own loops for multi-camera operations |
-| No `from_camera()` factory (AquaMVS) | `from_camera(camera, interface)` (AquaCore) | Phase 2 addition | Integrates with Phase 1 `create_camera()` API |
-| Protocol has `cast_ray()` (AquaMVS) | Protocol has `back_project()` (AquaCore) | Phase 2 rename | Must update Protocol and all implementations |
+| `cast_ray()` (AquaMVS) | `back_project()` (AquaKit) | Phase 2 rename | Symmetric naming with `project()`; consistent with Phase 1 `camera.pixel_to_ray()` → `RefractiveProjectionModel.back_project()` distinction |
+| No multi-camera helpers (AquaMVS) | `project_multi()`, `back_project_multi()` (AquaKit) | Phase 2 addition | Callers don't need to write their own loops for multi-camera operations |
+| No `from_camera()` factory (AquaMVS) | `from_camera(camera, interface)` (AquaKit) | Phase 2 addition | Integrates with Phase 1 `create_camera()` API |
+| Protocol has `cast_ray()` (AquaMVS) | Protocol has `back_project()` (AquaKit) | Phase 2 rename | Must update Protocol and all implementations |
 
 **Deprecated/outdated:**
-- `cast_ray()` method name: Replaced by `back_project()` in AquaCore. AquaMVS callers that use `cast_ray()` must be rewired to `back_project()`.
+- `cast_ray()` method name: Replaced by `back_project()` in AquaKit. AquaMVS callers that use `cast_ray()` must be rewired to `back_project()`.
 
 ---
 
@@ -702,16 +702,16 @@ def test_newton_raphson_residual_below_tolerance(model, device):
 - `C:/Users/tucke/PycharmProjects/AquaMVS/tests/test_projection/test_refractive.py` — All test patterns: constructor tests, cast_ray tests, project tests, round-trip tests, differentiability tests, CUDA tests
 - `C:/Users/tucke/PycharmProjects/AquaMVS/tests/test_projection/test_protocol.py` — Protocol compliance test patterns with _DummyProjectionModel
 - `C:/Users/tucke/PycharmProjects/AquaMVS/tests/test_projection/test_cross_validation.py` — Cross-validation approach: known geometry, grid tests, rotated camera tests
-- `C:/Users/tucke/PycharmProjects/AquaCore/src/aquacore/refraction.py` — Phase 1 refractive_project(), refractive_back_project() APIs (what Phase 2 builds on)
-- `C:/Users/tucke/PycharmProjects/AquaCore/src/aquacore/types.py` — InterfaceParams, CameraExtrinsics.C property
-- `C:/Users/tucke/PycharmProjects/AquaCore/src/aquacore/camera.py` — _BaseCamera attributes K, R, t; create_camera() return type
-- `C:/Users/tucke/PycharmProjects/AquaCore/tests/conftest.py` — Device fixture pattern (cpu + cuda-skipif)
-- `C:/Users/tucke/PycharmProjects/AquaCore/.planning/phases/01-foundation-and-physics-math/01-VERIFICATION.md` — Phase 1 verified artifacts and test patterns
+- `C:/Users/tucke/PycharmProjects/AquaKit/src/aquakit/refraction.py` — Phase 1 refractive_project(), refractive_back_project() APIs (what Phase 2 builds on)
+- `C:/Users/tucke/PycharmProjects/AquaKit/src/aquakit/types.py` — InterfaceParams, CameraExtrinsics.C property
+- `C:/Users/tucke/PycharmProjects/AquaKit/src/aquakit/camera.py` — _BaseCamera attributes K, R, t; create_camera() return type
+- `C:/Users/tucke/PycharmProjects/AquaKit/tests/conftest.py` — Device fixture pattern (cpu + cuda-skipif)
+- `C:/Users/tucke/PycharmProjects/AquaKit/.planning/phases/01-foundation-and-physics-math/01-VERIFICATION.md` — Phase 1 verified artifacts and test patterns
 
 ### Secondary (MEDIUM confidence)
 
-- `C:/Users/tucke/PycharmProjects/AquaCore/.planning/research/aquamvs-map.md` — Pre-mapped AquaMVS architecture summary; used as navigation before source inspection
-- `C:/Users/tucke/PycharmProjects/AquaCore/.planning/research/ARCHITECTURE.md` — Layer dependency graph; confirms projection as Layer 3 above physics math
+- `C:/Users/tucke/PycharmProjects/AquaKit/.planning/research/aquamvs-map.md` — Pre-mapped AquaMVS architecture summary; used as navigation before source inspection
+- `C:/Users/tucke/PycharmProjects/AquaKit/.planning/research/ARCHITECTURE.md` — Layer dependency graph; confirms projection as Layer 3 above physics math
 
 ---
 

@@ -11,11 +11,11 @@
 
 ### Locked Decisions
 
-- **Guiding Principle: Unify Existing Implementations** — AquaCore v1 extracts and unifies existing behavior from AquaCal and AquaMVS. The default for any gray area is to match existing implementations unless there is a clear reason to diverge (broken, inconsistent, or undocumented behavior).
+- **Guiding Principle: Unify Existing Implementations** — AquaKit v1 extracts and unifies existing behavior from AquaCal and AquaMVS. The default for any gray area is to match existing implementations unless there is a clear reason to diverge (broken, inconsistent, or undocumented behavior).
 - **Source repositories (same machine):** AquaCal at `C:\Users\tucke\PycharmProjects\AquaCal`, AquaMVS at `C:\Users\tucke\PycharmProjects\AquaMVS`
 - **Camera Model API:** Fisheye distortion model is OpenCV fisheye (k1-k4 equidistant). `create_camera()` factory is the only public construction API; underlying classes are internal.
 - **Refraction Model:** Simplified air-to-water (single interface, one refractive index ratio). Not the full 3-layer air-glass-water chain. Flat interface only (no tilted interface support needed).
-- **Total internal reflection handling:** Match existing AquaCal/AquaMVS behavior — AquaCal returns None; AquaMVS clamps `sin²(θ) >= 0` (no explicit TIR flag, no NaN). AquaCore must return a validity flag, not NaN.
+- **Total internal reflection handling:** Match existing AquaCal/AquaMVS behavior — AquaCal returns None; AquaMVS clamps `sin²(θ) >= 0` (no explicit TIR flag, no NaN). AquaKit must return a validity flag, not NaN.
 - **Validation strategy:** Validate at boundaries (factory functions like `create_camera()` validate and raise); internal math functions trust their inputs.
 - **Device mismatch:** Raise on mismatch with clear error message — no silent tensor moves between devices.
 - **Backend:** PyTorch (follow AquaMVS patterns).
@@ -40,9 +40,9 @@ None — discussion stayed within phase scope
 
 ## Summary
 
-Phase 1 implements the complete geometry foundation for AquaCore by porting existing NumPy implementations from AquaCal to PyTorch and unifying with AquaMVS patterns. The work is a *translation*, not a greenfield design — every function has a known-good reference implementation to port. The main engineering challenge is the NumPy-to-PyTorch translation: replacing `np.linalg.*` with `torch.linalg.*`, replacing vectorized NumPy loops with batched tensor ops, and adding device-agnostic patterns throughout.
+Phase 1 implements the complete geometry foundation for AquaKit by porting existing NumPy implementations from AquaCal to PyTorch and unifying with AquaMVS patterns. The work is a *translation*, not a greenfield design — every function has a known-good reference implementation to port. The main engineering challenge is the NumPy-to-PyTorch translation: replacing `np.linalg.*` with `torch.linalg.*`, replacing vectorized NumPy loops with batched tensor ops, and adding device-agnostic patterns throughout.
 
-The two source codebases are broadly consistent in physics and math conventions (same Snell's law formula, same triangulation algorithm, same coordinate system). Key differences are the compute backend (NumPy vs PyTorch), point shapes (single-point vs batch-first), and error signaling (None vs validity mask). AquaCore adopts all AquaMVS patterns for these decisions since AquaMVS is the PyTorch-native codebase.
+The two source codebases are broadly consistent in physics and math conventions (same Snell's law formula, same triangulation algorithm, same coordinate system). Key differences are the compute backend (NumPy vs PyTorch), point shapes (single-point vs batch-first), and error signaling (None vs validity mask). AquaKit adopts all AquaMVS patterns for these decisions since AquaMVS is the PyTorch-native codebase.
 
 The most complex individual component is the pinhole/fisheye camera `create_camera()` factory, because it must bridge PyTorch data storage with OpenCV-based distortion (which requires NumPy). The approach used in AquaMVS — store tensors in Python, convert to NumPy only at the OpenCV boundary — is the established pattern to follow.
 
@@ -71,10 +71,10 @@ The most complex individual component is the pinhole/fisheye camera `create_came
 
 | Instead of | Could Use | Tradeoff |
 |------------|-----------|----------|
-| cv2.Rodrigues for rvec/matrix | torch-based Rodrigues | AquaCal uses cv2.Rodrigues; but AquaMVS uses no Rodrigues at all. AquaCore should implement pure-PyTorch Rodrigues to avoid OpenCV dependency in transforms.py since it is pure math |
+| cv2.Rodrigues for rvec/matrix | torch-based Rodrigues | AquaCal uses cv2.Rodrigues; but AquaMVS uses no Rodrigues at all. AquaKit should implement pure-PyTorch Rodrigues to avoid OpenCV dependency in transforms.py since it is pure math |
 | cv2.fisheye for distortion | kornia.geometry.camera | kornia is an optional dep in pyproject.toml; prefer cv2 to match existing behavior exactly |
 
-**Note on Rodrigues:** AquaCal uses `cv2.Rodrigues` in `transforms.py`. AquaMVS does not expose transforms at all. For AquaCore, implementing pure-PyTorch Rodrigues (using the Rodrigues formula: `R = I*cos(θ) + sin(θ)*[k]× + (1-cos(θ))*k⊗k`) removes the cv2 dependency from transforms.py and makes it GPU-compatible. This is a rare justified divergence from AquaCal — cv2.Rodrigues is CPU-only and returns NumPy, making it incompatible with device-agnostic tensors.
+**Note on Rodrigues:** AquaCal uses `cv2.Rodrigues` in `transforms.py`. AquaMVS does not expose transforms at all. For AquaKit, implementing pure-PyTorch Rodrigues (using the Rodrigues formula: `R = I*cos(θ) + sin(θ)*[k]× + (1-cos(θ))*k⊗k`) removes the cv2 dependency from transforms.py and makes it GPU-compatible. This is a rare justified divergence from AquaCal — cv2.Rodrigues is CPU-only and returns NumPy, making it incompatible with device-agnostic tensors.
 
 **Installation:** No new dependencies needed — all are in pyproject.toml already.
 
@@ -87,7 +87,7 @@ The most complex individual component is the pinhole/fisheye camera `create_came
 All scaffold files already exist (empty stubs). Phase 1 fills these files:
 
 ```
-src/aquacore/
+src/aquakit/
 ├── types.py          # TYPE-01..05: dataclasses + type aliases
 ├── interface.py      # REF-05: InterfaceParams dataclass + ray_plane_intersection
 ├── camera.py         # CAM-01..06: pinhole/fisheye internals + create_camera()
@@ -100,10 +100,10 @@ The `projection/` subpackage (Phase 2) is NOT part of Phase 1, but `refraction.p
 
 ### Pattern 1: Type Aliases as torch.Tensor (not NDArray)
 
-AquaCal defines `Vec3 = NDArray[np.float64]`. AquaCore must redefine as `torch.Tensor` type aliases with documented shapes.
+AquaCal defines `Vec3 = NDArray[np.float64]`. AquaKit must redefine as `torch.Tensor` type aliases with documented shapes.
 
 ```python
-# src/aquacore/types.py
+# src/aquakit/types.py
 # Source: AquaCal config/schema.py + AquaMVS calibration.py
 from typing import TypeAlias
 import torch
@@ -118,7 +118,7 @@ Note: These are documentation aliases only — Python's type system cannot enfor
 ### Pattern 2: Dataclasses with Tensor Fields
 
 ```python
-# src/aquacore/types.py
+# src/aquakit/types.py
 # Pattern from AquaCal config/schema.py, translated to torch.Tensor fields
 from dataclasses import dataclass
 import torch
@@ -176,7 +176,7 @@ class InterfaceParams:
 ### Pattern 3: create_camera() Factory with Internal Classes
 
 ```python
-# src/aquacore/camera.py
+# src/aquakit/camera.py
 # Pattern from AquaCal core/camera.py, adapted to PyTorch + create_camera() API
 
 class _PinholeCamera:
@@ -200,7 +200,7 @@ def create_camera(
     return _PinholeCamera(intrinsics, extrinsics)
 ```
 
-**Note:** AquaCal's `Camera` takes a `name` parameter. AquaCore does not need this since the `name` is used only for the AquaCal `camera_distances` dict lookup (which AquaCore eliminates by using a single `water_z`). The camera object itself is anonymous.
+**Note:** AquaCal's `Camera` takes a `name` parameter. AquaKit does not need this since the `name` is used only for the AquaCal `camera_distances` dict lookup (which AquaKit eliminates by using a single `water_z`). The camera object itself is anonymous.
 
 ### Pattern 4: Pinhole Projection (PyTorch, Batch-First)
 
@@ -231,7 +231,7 @@ def project(self, points: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
 Direct port of AquaCal `snells_law_3d` to PyTorch batch form:
 
 ```python
-# src/aquacore/refraction.py
+# src/aquakit/refraction.py
 # Source: AquaCal core/refractive_geometry.py snells_law_3d
 # + AquaMVS projection/refractive.py cast_ray (inline Snell's law)
 
@@ -274,12 +274,12 @@ def snells_law_3d(
     return directions, valid
 ```
 
-**Key difference from AquaMVS:** AquaMVS's inline Snell's law in `cast_ray()` uses `torch.clamp(1.0 - sin_t_sq, min=0.0)` without an explicit TIR flag (it silently continues). AquaCore needs the explicit `valid` flag per the requirements (REF-02). The formula is identical; we add the flag on top.
+**Key difference from AquaMVS:** AquaMVS's inline Snell's law in `cast_ray()` uses `torch.clamp(1.0 - sin_t_sq, min=0.0)` without an explicit TIR flag (it silently continues). AquaKit needs the explicit `valid` flag per the requirements (REF-02). The formula is identical; we add the flag on top.
 
 ### Pattern 6: Newton-Raphson Refractive Projection (Fixed Iterations)
 
 ```python
-# src/aquacore/refraction.py
+# src/aquakit/refraction.py
 # Source: AquaMVS projection/refractive.py project() method
 # Source: AquaCal refractive_geometry.py _refractive_project_newton
 
@@ -303,7 +303,7 @@ Note: This function returns the **interface point** (not the pixel). The caller 
 Direct port of AquaMVS `triangulate_rays`:
 
 ```python
-# src/aquacore/triangulation.py
+# src/aquakit/triangulation.py
 # Source: AquaMVS triangulation.py triangulate_rays (identical algorithm to AquaCal)
 
 def triangulate_rays(rays: list[tuple[torch.Tensor, torch.Tensor]]) -> torch.Tensor:
@@ -324,10 +324,10 @@ def point_to_ray_distance(
 
 ### Pattern 8: Rodrigues in Pure PyTorch
 
-AquaCal uses `cv2.Rodrigues` (CPU + NumPy). AquaCore should implement pure-PyTorch Rodrigues to enable GPU usage and autograd:
+AquaCal uses `cv2.Rodrigues` (CPU + NumPy). AquaKit should implement pure-PyTorch Rodrigues to enable GPU usage and autograd:
 
 ```python
-# src/aquacore/transforms.py
+# src/aquakit/transforms.py
 
 def rvec_to_matrix(rvec: torch.Tensor) -> torch.Tensor:
     """Convert Rodrigues vector to rotation matrix.
@@ -387,7 +387,7 @@ Use `torch.testing.assert_close(result, expected, atol=1e-5, rtol=0)` for geomet
 - **Hardcoding `.cuda()` in tests:** Always parametrize over device fixture, never call `.cuda()` directly.
 - **Importing AquaCal/AquaMVS in tests:** Tests must be self-contained. Compute known ground-truth values analytically or from first principles, not by calling the reference implementations.
 - **Using `torch.float64` throughout:** Follow AquaMVS — float32 for geometry tensors, float64 only for `dist_coeffs` (OpenCV requirement).
-- **Returning None for TIR:** Return `(directions, valid_mask)` — None is the AquaCal pattern, not the AquaCore pattern.
+- **Returning None for TIR:** Return `(directions, valid_mask)` — None is the AquaCal pattern, not the AquaKit pattern.
 - **Silent device moves:** Never call `.to(device)` inside math functions without explicit parameter.
 - **In-place ops on CUDA in Newton-Raphson:** AquaMVS uses `r_p = torch.clamp(r_p, min=0.0)` + `r_p = torch.minimum(r_p, r_q)` (non-in-place) for autograd compatibility. Do not use `r_p.clamp_()`.
 
@@ -427,7 +427,7 @@ Use `torch.testing.assert_close(result, expected, atol=1e-5, rtol=0)` for geomet
 
 **What goes wrong:** The interface normal `[0, 0, -1]` points from water toward air. For an air-to-water ray (going +Z), `dot(ray, normal) < 0` — the normal points opposite to the ray. The implementation must flip the normal to point into the destination medium.
 **Why it happens:** Snell's law formula requires the normal to point from incident medium toward transmission medium.
-**How to avoid:** Implement the `cos_i < 0` check from AquaCal and flip n accordingly. AquaMVS uses `cos_i = -(rays_world * self.normal).sum(dim=-1)` with hardcoded negation because it always does air-to-water. AquaCore's standalone `snells_law_3d` handles both directions.
+**How to avoid:** Implement the `cos_i < 0` check from AquaCal and flip n accordingly. AquaMVS uses `cos_i = -(rays_world * self.normal).sum(dim=-1)` with hardcoded negation because it always does air-to-water. AquaKit's standalone `snells_law_3d` handles both directions.
 **Warning signs:** Refracted rays pointing in wrong direction; TIR reported where none should occur.
 
 ### Pitfall 4: torch.linalg.solve fails on degenerate triangulation systems
@@ -572,10 +572,10 @@ def test_known_angle(device):
 
 | Old Approach | Current Approach | When Changed | Impact |
 |--------------|------------------|--------------|--------|
-| NumPy for geometry (AquaCal) | PyTorch for geometry (AquaMVS, AquaCore) | AquaMVS from start | GPU support, autograd |
-| Single-point API (AquaCal) | Batch-first (N, 3) API (AquaMVS, AquaCore) | AquaMVS from start | Vectorized operations |
-| None for TIR (AquaCal) | (output, valid_mask) for all failures (AquaMVS, AquaCore) | AquaMVS from start | Batch-compatible error signaling |
-| Convergence-based N-R (AquaCal) | Fixed 10 iterations N-R (AquaMVS, AquaCore) | AquaMVS from start | Deterministic autograd |
+| NumPy for geometry (AquaCal) | PyTorch for geometry (AquaMVS, AquaKit) | AquaMVS from start | GPU support, autograd |
+| Single-point API (AquaCal) | Batch-first (N, 3) API (AquaMVS, AquaKit) | AquaMVS from start | Vectorized operations |
+| None for TIR (AquaCal) | (output, valid_mask) for all failures (AquaMVS, AquaKit) | AquaMVS from start | Batch-compatible error signaling |
+| Convergence-based N-R (AquaCal) | Fixed 10 iterations N-R (AquaMVS, AquaKit) | AquaMVS from start | Deterministic autograd |
 
 ---
 

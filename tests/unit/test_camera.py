@@ -9,8 +9,8 @@ from __future__ import annotations
 import pytest
 import torch
 
-from aquacore import CameraExtrinsics, CameraIntrinsics, create_camera
-from aquacore.camera import _FisheyeCamera, _PinholeCamera
+from aquakit import CameraExtrinsics, CameraIntrinsics, create_camera
+from aquakit.camera import _FisheyeCamera, _PinholeCamera
 
 # ---------------------------------------------------------------------------
 # Fixtures

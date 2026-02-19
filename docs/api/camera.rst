@@ -1,6 +1,6 @@
 Camera
 ======
 
-.. automodule:: aquacore.camera
+.. automodule:: aquakit.camera
    :members:
    :undoc-members:

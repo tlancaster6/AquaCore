@@ -31,14 +31,14 @@ re_verification: false
 
 | Artifact | Provides | Exists | Substantive | Wired | Status |
 |----------|----------|--------|-------------|-------|--------|
-| src/aquacore/io/frameset.py | FrameSet @runtime_checkable Protocol | Yes | 93 lines, @runtime_checkable on line 9, 5 protocol methods with Google docstrings | Imported via io/__init__.py | VERIFIED |
-| src/aquacore/io/images.py | ImageSet class + create_frameset factory | Yes | 282 lines, class ImageSet (lines 32-216), def create_frameset (lines 226-281) | Exported by io/__init__.py | VERIFIED |
-| src/aquacore/io/video.py | VideoSet class | Yes | 219 lines, class VideoSet (lines 15-218) with all 5 protocol methods | Imported by io/__init__.py and images.py | VERIFIED |
-| src/aquacore/io/__init__.py | io public API (4 names) | Yes | 7 lines, exports FrameSet, ImageSet, VideoSet, create_frameset with __all__ | Re-exported by aquacore/__init__.py | VERIFIED |
-| src/aquacore/__init__.py | Top-level re-export | Yes | Line 8: from .io import all 4 names; all 4 in __all__ alphabetically | N/A (top level) | VERIFIED |
-| tests/unit/test_io/test_imageset.py | ImageSet unit tests | Yes | 333 lines, 15 test functions (test_imageset_*) | Imports from aquacore.io.frameset and aquacore.io.images | VERIFIED |
-| tests/unit/test_io/test_videoset.py | VideoSet unit tests | Yes | 267 lines, 13 test functions (test_videoset_*) | Imports from aquacore.io.frameset and aquacore.io.video | VERIFIED |
-| tests/unit/test_io/test_factory.py | create_frameset tests | Yes | 124 lines, 6 test functions (test_create_frameset_*) | Imports from aquacore.io.images and aquacore.io.video | VERIFIED |
+| src/aquakit/io/frameset.py | FrameSet @runtime_checkable Protocol | Yes | 93 lines, @runtime_checkable on line 9, 5 protocol methods with Google docstrings | Imported via io/__init__.py | VERIFIED |
+| src/aquakit/io/images.py | ImageSet class + create_frameset factory | Yes | 282 lines, class ImageSet (lines 32-216), def create_frameset (lines 226-281) | Exported by io/__init__.py | VERIFIED |
+| src/aquakit/io/video.py | VideoSet class | Yes | 219 lines, class VideoSet (lines 15-218) with all 5 protocol methods | Imported by io/__init__.py and images.py | VERIFIED |
+| src/aquakit/io/__init__.py | io public API (4 names) | Yes | 7 lines, exports FrameSet, ImageSet, VideoSet, create_frameset with __all__ | Re-exported by aquakit/__init__.py | VERIFIED |
+| src/aquakit/__init__.py | Top-level re-export | Yes | Line 8: from .io import all 4 names; all 4 in __all__ alphabetically | N/A (top level) | VERIFIED |
+| tests/unit/test_io/test_imageset.py | ImageSet unit tests | Yes | 333 lines, 15 test functions (test_imageset_*) | Imports from aquakit.io.frameset and aquakit.io.images | VERIFIED |
+| tests/unit/test_io/test_videoset.py | VideoSet unit tests | Yes | 267 lines, 13 test functions (test_videoset_*) | Imports from aquakit.io.frameset and aquakit.io.video | VERIFIED |
+| tests/unit/test_io/test_factory.py | create_frameset tests | Yes | 124 lines, 6 test functions (test_create_frameset_*) | Imports from aquakit.io.images and aquakit.io.video | VERIFIED |
 | tests/unit/test_io/conftest.py | Shared video fixture | Yes | 49 lines, two_camera_video_files fixture with mp4v/MJPG fallback | Available to test_videoset.py and test_factory.py via pytest conftest | VERIFIED |
 | tests/unit/test_io/__init__.py | Package init | Yes | Empty (correct for pytest subpackage) | N/A | VERIFIED |
 
@@ -50,16 +50,16 @@ re_verification: false
 
 | From | To | Via | Status | Evidence |
 |------|----|-----|--------|----------|
-| src/aquacore/io/images.py | cv2.imread | _read_frame_dict method | WIRED | Line 143: bgr = cv2.imread(str(files[idx])) |
-| src/aquacore/io/images.py | torch.from_numpy | BGR to (C,H,W) float32 conversion | WIRED | Line 156: torch.from_numpy(rgb).permute(2, 0, 1).float() / 255.0 |
+| src/aquakit/io/images.py | cv2.imread | _read_frame_dict method | WIRED | Line 143: bgr = cv2.imread(str(files[idx])) |
+| src/aquakit/io/images.py | torch.from_numpy | BGR to (C,H,W) float32 conversion | WIRED | Line 156: torch.from_numpy(rgb).permute(2, 0, 1).float() / 255.0 |
 
 ### Plan 02 Key Links
 
 | From | To | Via | Status | Evidence |
 |------|----|-----|--------|----------|
-| src/aquacore/io/video.py | cv2.VideoCapture | _open_captures method | WIRED | Line 69: cap = cv2.VideoCapture(str(path)) |
-| src/aquacore/io/images.py | src/aquacore/io/video.py | create_frameset imports VideoSet | WIRED | Line 11: from .video import VideoSet |
-| src/aquacore/__init__.py | src/aquacore/io/__init__.py | top-level re-export | WIRED | Line 8: from .io import FrameSet, ImageSet, VideoSet, create_frameset |
+| src/aquakit/io/video.py | cv2.VideoCapture | _open_captures method | WIRED | Line 69: cap = cv2.VideoCapture(str(path)) |
+| src/aquakit/io/images.py | src/aquakit/io/video.py | create_frameset imports VideoSet | WIRED | Line 11: from .video import VideoSet |
+| src/aquakit/__init__.py | src/aquakit/io/__init__.py | top-level re-export | WIRED | Line 8: from .io import FrameSet, ImageSet, VideoSet, create_frameset |
 
 ---
 
@@ -127,12 +127,12 @@ Test: test_imageset_independent_copies reads frame 0 twice and asserts t1.data_p
 
 ## Anti-Pattern Scan
 
-Files scanned: frameset.py, images.py, video.py, io/__init__.py, aquacore/__init__.py,
+Files scanned: frameset.py, images.py, video.py, io/__init__.py, aquakit/__init__.py,
 test_imageset.py, test_videoset.py, test_factory.py, conftest.py
 
 | File | Pattern | Finding | Severity |
 |------|---------|---------|----------|
-| All src/aquacore/io/*.py | TODO/FIXME/placeholder | None found | -- |
+| All src/aquakit/io/*.py | TODO/FIXME/placeholder | None found | -- |
 | images.py, video.py | return {} / return [] stubs | None found; result dicts populated from real reads | -- |
 | video.py | __exit__ no-op (forgot release) | cap.release() called for all caps; self._caps cleared to {} | -- |
 | video.py | Mid-init handle leak | Properly handled: opened list tracks names; del self._caps[name] on exception before re-raise | -- |

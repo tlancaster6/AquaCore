@@ -7,8 +7,8 @@ import warnings
 import pytest
 import torch
 
-from aquacore import CalibrationData, CameraData, load_calibration_data
-from aquacore.types import CameraExtrinsics, CameraIntrinsics, InterfaceParams
+from aquakit import CalibrationData, CameraData, load_calibration_data
+from aquakit.types import CameraExtrinsics, CameraIntrinsics, InterfaceParams
 
 # ---------------------------------------------------------------------------
 # Fixtures

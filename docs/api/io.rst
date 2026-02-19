@@ -1,18 +1,18 @@
 I/O
 ===
 
-.. automodule:: aquacore.io
+.. automodule:: aquakit.io
    :members:
    :undoc-members:
 
-.. automodule:: aquacore.io.frameset
+.. automodule:: aquakit.io.frameset
    :members:
    :undoc-members:
 
-.. automodule:: aquacore.io.video
+.. automodule:: aquakit.io.video
    :members:
    :undoc-members:
 
-.. automodule:: aquacore.io.images
+.. automodule:: aquakit.io.images
    :members:
    :undoc-members:

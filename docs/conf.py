@@ -2,18 +2,19 @@
 
 import sys
 from datetime import datetime
-from importlib.metadata import PackageNotFoundError, version
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as get_version
 from pathlib import Path
 
 # Add project source to path for autodoc
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 # Project information
-project = "Aquacore"
+project = "AquaKit"
 copyright = f"{datetime.now().year}, Tucker Lancaster"
 author = "Tucker Lancaster"
 try:
-    release = version("aquacore")
+    release = get_version("aquakit")
 except PackageNotFoundError:
     release = "0.1.0"
 
@@ -42,7 +43,7 @@ nbsphinx_requirejs_path = ""  # Avoid RequireJS conflicts
 
 # HTML output
 html_theme = "furo"
-html_title = "Aquacore"
+html_title = "AquaKit"
 html_static_path = []
 
 # Furo theme options

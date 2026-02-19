@@ -19,7 +19,7 @@ provides:
   - Complete import migration reference for AquaMVS consumers (8 ported symbols)
   - Documented intentional gaps: 12 AquaCal-only modules, 11 AquaMVS-only modules
   - Signature change docs for 6 non-trivial API differences
-  - New-in-AquaCore section for 5 additions with no prior equivalent
+  - New-in-AquaKit section for 5 additions with no prior equivalent
 affects: [AquaCal migration, AquaMVS migration, external consumers]
 
 # Tech tracking
@@ -37,7 +37,7 @@ key-files:
 key-decisions:
   - "Guide structured by consumer, not by module — allows AquaCal and AquaMVS teams to navigate directly to their section"
   - "Signature change depth: examples only for non-obvious changes (TIR pattern, two-step refractive_project, triangulate_rays list API, create_camera dataclass args, load_calibration name change)"
-  - "AquaMVS section has no Signature Changes subsection — all AquaMVS → AquaCore ports are identical APIs, pure path migration"
+  - "AquaMVS section has no Signature Changes subsection — all AquaMVS → AquaKit ports are identical APIs, pure path migration"
 
 patterns-established:
   - "Import migration guide: find old path in left column, use new path in right column, check Notes column for caveats"
@@ -50,7 +50,7 @@ completed: 2026-02-18
 
 # Phase 5 Plan 3: Rewiring Guide Summary
 
-**Import migration reference mapping 21 AquaCal and 8 AquaMVS symbols to aquacore, with signature diffs for 6 non-trivial API changes and NOT PORTED documentation for 23 intentional gaps**
+**Import migration reference mapping 21 AquaCal and 8 AquaMVS symbols to aquakit, with signature diffs for 6 non-trivial API changes and NOT PORTED documentation for 23 intentional gaps**
 
 ## Performance
 
@@ -62,22 +62,22 @@ completed: 2026-02-18
 
 ## Accomplishments
 
-- Verified all 34 symbols in `aquacore.__all__` are covered in the guide (either as migration targets or as new additions)
+- Verified all 34 symbols in `aquakit.__all__` are covered in the guide (either as migration targets or as new additions)
 - Wrote complete AquaCal import table (21 ported symbols) with signature change sections for the 6 non-obvious API differences
 - Wrote complete AquaMVS import table (8 ported symbols) with NOT PORTED documentation for 11 pipeline-specific modules
 - Documented `create_camera` signature difference (confirmed from source: no `name` arg, takes `CameraIntrinsics`/`CameraExtrinsics` dataclasses directly)
-- Added "New in AquaCore" section for 5 new symbols with no prior equivalent (`trace_ray_water_to_air`, `back_project_multi`, `project_multi`, `point_to_ray_distance`, `create_frameset`)
+- Added "New in AquaKit" section for 5 new symbols with no prior equivalent (`trace_ray_water_to_air`, `back_project_multi`, `project_multi`, `point_to_ray_distance`, `create_frameset`)
 
 ## Task Commits
 
-1. **Task 1: Verify AquaCore public API against research mapping** - verification only, no commit (findings applied directly to Task 2)
+1. **Task 1: Verify AquaKit public API against research mapping** - verification only, no commit (findings applied directly to Task 2)
 2. **Task 2: Write the rewiring guide** - `537aad6` (feat)
 
 **Plan metadata:** (docs commit — see below)
 
 ## Files Created/Modified
 
-- `.planning/rewiring/REWIRING.md` - Complete import migration guide (315 lines): AquaCal section, AquaMVS section, prerequisite instructions, new-in-aquacore section
+- `.planning/rewiring/REWIRING.md` - Complete import migration guide (315 lines): AquaCal section, AquaMVS section, prerequisite instructions, new-in-aquakit section
 
 ## Decisions Made
 
@@ -114,7 +114,7 @@ None - no external service configuration required.
 
 - Rewiring guide is complete. Consumer teams (AquaCal, AquaMVS) can migrate imports using the find-and-replace tables.
 - Phase 5 remaining work: Plan 05-02 (GitHub CI/branch protection configuration) — a human-action plan requiring GitHub repository settings and PyPI trusted publisher setup.
-- All AquaCore source code is complete and packaged. The rewiring guide is the final dev artifact before release.
+- All AquaKit source code is complete and packaged. The rewiring guide is the final dev artifact before release.
 
 ---
 *Phase: 05-packaging-and-release*

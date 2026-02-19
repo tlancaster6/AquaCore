@@ -1,6 +1,6 @@
 Calibration
 ===========
 
-.. automodule:: aquacore.calibration
+.. automodule:: aquakit.calibration
    :members:
    :undoc-members:

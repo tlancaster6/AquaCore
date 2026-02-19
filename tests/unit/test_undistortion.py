@@ -4,9 +4,9 @@ import numpy as np
 import pytest
 import torch
 
-from aquacore import compute_undistortion_maps, undistort_image
-from aquacore.calibration import CameraData
-from aquacore.types import CameraExtrinsics, CameraIntrinsics
+from aquakit import compute_undistortion_maps, undistort_image
+from aquakit.calibration import CameraData
+from aquakit.types import CameraExtrinsics, CameraIntrinsics
 
 # ---------------------------------------------------------------------------
 # Fixtures

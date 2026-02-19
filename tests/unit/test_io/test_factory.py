@@ -6,8 +6,8 @@ import cv2
 import numpy as np
 import pytest
 
-from aquacore.io.images import ImageSet, create_frameset
-from aquacore.io.video import VideoSet
+from aquakit.io.images import ImageSet, create_frameset
+from aquakit.io.video import VideoSet
 
 # ---------------------------------------------------------------------------
 # create_frameset with real directories (ImageSet)

@@ -1,4 +1,4 @@
-"""Shared geometry types for all AquaCore modules.
+"""Shared geometry types for all AquaKit modules.
 
 Coordinate system: world origin at reference camera optical center.
 +X right, +Y forward, +Z down into water.

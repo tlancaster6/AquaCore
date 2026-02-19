@@ -13,12 +13,12 @@ from __future__ import annotations
 import pytest
 import torch
 
-from aquacore import (
+from aquakit import (
     InterfaceParams,
     point_to_ray_distance,
     triangulate_rays,
 )
-from aquacore.types import INTERFACE_NORMAL
+from aquakit.types import INTERFACE_NORMAL
 
 N_AIR = 1.0
 N_WATER = 1.333
@@ -222,7 +222,7 @@ class TestRefractiveTriangulationIntegration:
 
         This validates the full refraction + triangulation pipeline (TRI-03).
         """
-        from aquacore import refractive_project
+        from aquakit import refractive_project
 
         interface = make_interface(device, water_z=0.0)
         known_point = torch.tensor([0.5, 0.5, 1.5], device=device)

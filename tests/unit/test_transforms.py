@@ -1,11 +1,11 @@
-"""Tests for rotation and pose transform utilities in aquacore.transforms."""
+"""Tests for rotation and pose transform utilities in aquakit.transforms."""
 
 import math
 
 import torch
 import torch.testing
 
-from aquacore import (
+from aquakit import (
     camera_center,
     compose_poses,
     invert_pose,

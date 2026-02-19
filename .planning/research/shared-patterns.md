@@ -2,13 +2,13 @@
 
 Mapped: 2026-02-18
 
-This document highlights where the two repos agree, disagree, and what AquaCore needs to reconcile.
+This document highlights where the two repos agree, disagree, and what AquaKit needs to reconcile.
 
 ---
 
 ## 1. Consistent Across Both Repos
 
-These patterns are stable and AquaCore should preserve them.
+These patterns are stable and AquaKit should preserve them.
 
 ### Coordinate Systems
 - **World frame:** Z-down (into water), origin at reference camera
@@ -51,7 +51,7 @@ These patterns are stable and AquaCore should preserve them.
 | **GPU** | No | Yes (CPU + CUDA) |
 | **Differentiable** | No | Yes |
 
-**AquaCore decision:** PyTorch (per project requirements). Follow AquaMVS patterns.
+**AquaKit decision:** PyTorch (per project requirements). Follow AquaMVS patterns.
 
 ### Point Shape Conventions
 
@@ -61,7 +61,7 @@ These patterns are stable and AquaCore should preserve them.
 | **Batch points** | (N, 3) in batch functions | (N, 3) always |
 | **Single pixel** | (2,) | (N, 2) where N=1 |
 
-**AquaCore decision:** Always batch — (N, 3) shapes. Matches AquaMVS.
+**AquaKit decision:** Always batch — (N, 3) shapes. Matches AquaMVS.
 
 ### Translation Vector Shape
 
@@ -69,7 +69,7 @@ These patterns are stable and AquaCore should preserve them.
 |--------|---------|---------|
 | **t shape** | (3,) or (3,1) inconsistent | (3,) always (normalizes at load) |
 
-**AquaCore decision:** (3,) always. Normalize at load boundary.
+**AquaKit decision:** (3,) always. Normalize at load boundary.
 
 ### Error Handling for Invalid Projections
 
@@ -79,7 +79,7 @@ These patterns are stable and AquaCore should preserve them.
 | **Batch failure** | NaN in output array | NaN + valid_mask boolean |
 | **TIR** | Returns None | Clamp sin^2 >= 0, no explicit flag |
 
-**AquaCore decision:** Return `(output, valid_mask)` tuple — matches AquaMVS, works for batches.
+**AquaKit decision:** Return `(output, valid_mask)` tuple — matches AquaMVS, works for batches.
 
 ### Newton-Raphson Convergence
 
@@ -89,7 +89,7 @@ These patterns are stable and AquaCore should preserve them.
 | **Tolerance** | 1e-9 meters | N/A (always runs 10) |
 | **Rationale** | Efficiency | Deterministic gradients |
 
-**AquaCore decision:** Fixed iterations (AquaMVS approach) — needed for autodiff support.
+**AquaKit decision:** Fixed iterations (AquaMVS approach) — needed for autodiff support.
 
 ### Projection API
 
@@ -99,7 +99,7 @@ These patterns are stable and AquaCore should preserve them.
 | **Back** | `refractive_back_project(camera, interface, pixel)` | `model.cast_ray(pixels)` — method on model |
 | **Model** | Standalone functions + Camera + Interface | `RefractiveProjectionModel` bundles everything |
 
-**AquaCore decision:** Object-oriented (AquaMVS approach) with `ProjectionModel` protocol.
+**AquaKit decision:** Object-oriented (AquaMVS approach) with `ProjectionModel` protocol.
 
 ### Camera Construction
 
@@ -109,7 +109,7 @@ These patterns are stable and AquaCore should preserve them.
 | **Fisheye** | `FisheyeCamera` subclass of `Camera` | `is_fisheye` flag on `CameraData` |
 | **Methods** | project(), pixel_to_ray() on Camera | Projection via separate `ProjectionModel` |
 
-**AquaCore decision:** Separate concerns — data (CameraIntrinsics, CameraExtrinsics) from behavior (ProjectionModel). Context says `create_camera()` factory only.
+**AquaKit decision:** Separate concerns — data (CameraIntrinsics, CameraExtrinsics) from behavior (ProjectionModel). Context says `create_camera()` factory only.
 
 ---
 
@@ -118,12 +118,12 @@ These patterns are stable and AquaCore should preserve them.
 ### 3.1 dist_coeffs dtype
 - AquaCal: float64 (NumPy default)
 - AquaMVS: float64 (explicit, because OpenCV requires it)
-- **Note:** Both agree on float64 for dist_coeffs. AquaCore should keep this even though other tensors are float32.
+- **Note:** Both agree on float64 for dist_coeffs. AquaKit should keep this even though other tensors are float32.
 
 ### 3.2 Back-projection return value
 - AquaCal: returns `(intersection_point, refracted_direction)` — origin is ON the interface
 - AquaMVS: returns `(origins, directions)` — origins also on water surface
-- **Note:** Consistent in practice. AquaCore should document that ray origins are at the interface.
+- **Note:** Consistent in practice. AquaKit should document that ray origins are at the interface.
 
 ### 3.3 Flat interface restriction
 - AquaCal: `refractive_project()` supports tilted interfaces (Brent fallback); `refractive_project_batch()` requires flat
@@ -133,11 +133,11 @@ These patterns are stable and AquaCore should preserve them.
 ### 3.4 Undistortion
 - AquaCal: `undistort_points()` operates on point arrays
 - AquaMVS: `compute_undistortion_maps()` + `undistort_image()` operates on images
-- **Note:** AquaCore Phase 3 needs image undistortion. Both patterns may be needed.
+- **Note:** AquaKit Phase 3 needs image undistortion. Both patterns may be needed.
 
 ---
 
-## 4. What AquaCore Extracts from Each
+## 4. What AquaKit Extracts from Each
 
 ### From AquaCal (reference implementations)
 - Type definitions: CameraIntrinsics, CameraExtrinsics, InterfaceParams, Vec2, Vec3, Mat3
@@ -163,7 +163,7 @@ These patterns are stable and AquaCore should preserve them.
 
 ## 5. Function Cross-Reference
 
-| Capability | AquaCal | AquaMVS | AquaCore Target |
+| Capability | AquaCal | AquaMVS | AquaKit Target |
 |-----------|---------|---------|-----------------|
 | Snell's law | `snells_law_3d()` | Inline in RefractiveProjectionModel | Standalone function (Phase 1) |
 | Forward project | `refractive_project()` | `model.project()` | `ProjectionModel.project()` (Phase 2) |

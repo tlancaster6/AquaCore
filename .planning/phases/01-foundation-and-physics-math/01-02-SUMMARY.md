@@ -30,8 +30,8 @@ key-files:
   created:
     - tests/unit/test_camera.py
   modified:
-    - src/aquacore/camera.py
-    - src/aquacore/__init__.py
+    - src/aquakit/camera.py
+    - src/aquakit/__init__.py
 
 key-decisions:
   - "OpenCV boundary: always .cpu().numpy() before cv2 calls, .to(device) after — documented in class docstring as non-differentiable"
@@ -74,8 +74,8 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `src/aquacore/camera.py` - _PinholeCamera, _FisheyeCamera, create_camera(); OpenCV boundary pattern documented in class docstrings
-- `src/aquacore/__init__.py` - Added `create_camera` to imports and `__all__`
+- `src/aquakit/camera.py` - _PinholeCamera, _FisheyeCamera, create_camera(); OpenCV boundary pattern documented in class docstrings
+- `src/aquakit/__init__.py` - Added `create_camera` to imports and `__all__`
 - `tests/unit/test_camera.py` - 15 tests for pinhole/fisheye projection, back-projection, round-trip, and factory validation
 
 ## Decisions Made
@@ -92,7 +92,7 @@ Each task was committed atomically:
 - **Found during:** Task 1 (pre-commit hook)
 - **Issue:** `import cv2` appeared after `import numpy as np`; ruff required alphabetical order (cv2 < numpy)
 - **Fix:** Used `ruff check --fix` to auto-sort imports
-- **Files modified:** src/aquacore/camera.py
+- **Files modified:** src/aquakit/camera.py
 - **Verification:** `hatch run lint` passes cleanly
 - **Committed in:** d6e6b46 (Task 1 commit, second attempt after hook fix)
 
@@ -123,9 +123,9 @@ Each task was committed atomically:
 
 ## Self-Check: PASSED
 
-- src/aquacore/camera.py: EXISTS
+- src/aquakit/camera.py: EXISTS
 - tests/unit/test_camera.py: EXISTS
-- src/aquacore/__init__.py: EXISTS (create_camera exported)
+- src/aquakit/__init__.py: EXISTS (create_camera exported)
 - Commit d6e6b46 (feat 01-02 camera.py): EXISTS
 - Commit f673ee2 (test 01-02 test_camera.py): EXISTS
 - All 15 test_camera.py tests pass on CPU

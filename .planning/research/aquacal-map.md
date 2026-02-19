@@ -5,7 +5,7 @@ Mapped: 2026-02-18
 
 ## 1. Module Layout
 
-### Core Modules (Primary for AquaCore)
+### Core Modules (Primary for AquaKit)
 
 - `core/camera.py` — Camera intrinsics/extrinsics, pinhole & fisheye projection, back-projection
 - `core/refractive_geometry.py` — Ray tracing through air-water interface using Snell's law

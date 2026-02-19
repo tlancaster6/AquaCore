@@ -2,14 +2,14 @@
 
 ## Development Setup
 
-AquaCore requires PyTorch but does not bundle it, so you can choose the build
+AquaKit requires PyTorch but does not bundle it, so you can choose the build
 that matches your hardware. Install PyTorch into the Hatch environment after
 creating it:
 
 ```bash
 # Clone the repository
-git clone https://github.com/tlancaster6/aquacore.git
-cd aquacore
+git clone https://github.com/tlancaster6/aquakit.git
+cd aquakit
 
 # Install Hatch (build/environment manager)
 pip install hatch

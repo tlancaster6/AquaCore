@@ -7,8 +7,8 @@ import numpy as np
 import pytest
 import torch
 
-from aquacore.io.frameset import FrameSet
-from aquacore.io.video import VideoSet
+from aquakit.io.frameset import FrameSet
+from aquakit.io.video import VideoSet
 
 # ---------------------------------------------------------------------------
 # Construction and length

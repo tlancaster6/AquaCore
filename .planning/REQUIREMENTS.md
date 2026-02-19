@@ -1,4 +1,4 @@
-# Requirements: AquaCore
+# Requirements: AquaKit
 
 **Defined:** 2026-02-18
 **Core Value:** Correct, tested PyTorch implementations of refractive multi-camera geometry that all Aqua consumers share instead of duplicating.

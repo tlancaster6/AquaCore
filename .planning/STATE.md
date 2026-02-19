@@ -53,7 +53,7 @@ Recent decisions affecting current work:
 - [Init]: PyTorch-first, no NumPy math — one implementation, no duplication
 - [Init]: Standalone tests only (no AquaCal oracle) — known-value tests, no test-time coupling
 - [Init]: Datasets deferred to v2 — keeps v1 focused on geometry foundation
-- [Init]: Rewiring guide, not rewiring — AquaCore ships independently
+- [Init]: Rewiring guide, not rewiring — AquaKit ships independently
 - [01-01]: Pure-PyTorch Rodrigues (not cv2.Rodrigues) — device-agnostic, autograd-compatible, handles theta=0 and theta=pi edge cases
 - [01-01]: dist_coeffs stored as float64 (OpenCV requirement); K as float32 (AquaMVS convention)
 - [01-01]: (output, valid_mask) return pattern for functions that can fail on individual elements (no NaN, no None)
@@ -70,7 +70,7 @@ Recent decisions affecting current work:
 - [02-02]: Protocol compliance tests are device-agnostic (no device fixture) — isinstance() tests Python structure, not tensor math
 - [Phase 03-calibration-and-undistortion]: water_z stored in InterfaceParams (not separate CalibrationData field) - consistent with Phase 1 types
 - [Phase 03-calibration-and-undistortion]: Bad camera entries skipped with UserWarning (not crash) - resilient loading for partial calibrations
-- [Phase 03-calibration-and-undistortion]: No AquaCal dependency in calibration.py - only json, warnings, torch, pathlib; aquacore stays importable without AquaCal
+- [Phase 03-calibration-and-undistortion]: No AquaCal dependency in calibration.py - only json, warnings, torch, pathlib; aquakit stays importable without AquaCal
 - [03-02]: Return raw (map_x, map_y) NumPy tuple from compute_undistortion_maps — no UndistortionData wrapper; minimal API surface
 - [03-02]: dist_coeffs reshaped to (4,1) for fisheye path — cv2.fisheye requires column vector; reshape is internal to undistortion.py
 - [03-02]: image_size from CameraIntrinsics (width, height) passed directly to OpenCV — both conventions match, no swap needed

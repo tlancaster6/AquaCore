@@ -1,7 +1,7 @@
 # GitHub Repository Configuration Audit
 
 **Audited:** 2026-02-19T01:27:07Z
-**Repository:** tlancaster6/AquaCore (https://github.com/tlancaster6/AquaCore)
+**Repository:** tlancaster6/AquaKit (https://github.com/tlancaster6/AquaKit)
 
 ## Secrets (`gh secret list`)
 
@@ -12,7 +12,7 @@
 
 *No secrets configured on this repository.*
 
-## Environments (`gh api repos/tlancaster6/aquacore/environments`)
+## Environments (`gh api repos/tlancaster6/aquakit/environments`)
 
 | Environment | Status |
 |-------------|--------|

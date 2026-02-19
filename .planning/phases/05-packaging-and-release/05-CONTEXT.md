@@ -22,7 +22,7 @@ The library installs from PyPI, CI enforces quality on every push, and consumer 
 - Slow tests remain manual dispatch only
 
 ### PyPI publishing
-- Package name: `aquacore` (already configured in pyproject.toml)
+- Package name: `aquakit` (already configured in pyproject.toml)
 - Versioning: SemVer starting at 0.1.0 (already configured with python-semantic-release)
 - Publishing: Tag-triggered via trusted publishing (already configured)
 - TestPyPI step before real PyPI (already configured in publish.yml)

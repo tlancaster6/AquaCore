@@ -8,8 +8,8 @@ import numpy as np
 import pytest
 import torch
 
-from aquacore.io.frameset import FrameSet
-from aquacore.io.images import ImageSet
+from aquakit.io.frameset import FrameSet
+from aquakit.io.images import ImageSet
 
 # ---------------------------------------------------------------------------
 # Fixtures

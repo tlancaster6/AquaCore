@@ -12,7 +12,7 @@ provides:
   - "@runtime_checkable ProjectionModel Protocol with project() and back_project()"
   - "RefractiveProjectionModel class with __init__, from_camera, to, project, back_project"
   - "project_multi() and back_project_multi() module-level multi-camera helpers"
-  - "Projection public API re-exported from both aquacore.projection and aquacore top-level"
+  - "Projection public API re-exported from both aquakit.projection and aquakit top-level"
 affects:
   - 02-projection-protocol (tests plan)
   - 03-calibration-loader
@@ -31,11 +31,11 @@ tech-stack:
 
 key-files:
   created:
-    - src/aquacore/projection/protocol.py
-    - src/aquacore/projection/refractive.py
+    - src/aquakit/projection/protocol.py
+    - src/aquakit/projection/refractive.py
   modified:
-    - src/aquacore/projection/__init__.py
-    - src/aquacore/__init__.py
+    - src/aquakit/projection/__init__.py
+    - src/aquakit/__init__.py
 
 key-decisions:
   - "back_project() inlines Snell's law (AquaMVS pattern) instead of delegating to refractive_back_project() — avoids intermediate allocation, matches verified AquaMVS source"
@@ -70,7 +70,7 @@ completed: 2026-02-18
 - Implemented `@runtime_checkable ProjectionModel(Protocol)` with `project()` and `back_project()` method signatures and Google-style docstrings describing shapes and semantics
 - Implemented `RefractiveProjectionModel` class with constructor (precomputing K_inv, C, n_ratio), `from_camera()` factory, `to(device)` mutable in-place transfer, `project()` delegating to Phase 1 `refractive_project()`, and `back_project()` inlining Snell's law per AquaMVS pattern
 - Added `project_multi()` and `back_project_multi()` module-level helpers that loop over camera models and stack into (M, N, ...) tensors
-- Updated `projection/__init__.py` and `aquacore/__init__.py` with complete exports in sorted order; all four names importable from both `aquacore.projection` and `aquacore` top-level
+- Updated `projection/__init__.py` and `aquakit/__init__.py` with complete exports in sorted order; all four names importable from both `aquakit.projection` and `aquakit` top-level
 
 ## Task Commits
 
@@ -81,10 +81,10 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `src/aquacore/projection/protocol.py` - `@runtime_checkable ProjectionModel(Protocol)` with `project()` and `back_project()` method stubs and full docstrings
-- `src/aquacore/projection/refractive.py` - `RefractiveProjectionModel` class with all five methods plus `project_multi` and `back_project_multi` module functions
-- `src/aquacore/projection/__init__.py` - Replaced stub with proper exports: `ProjectionModel`, `RefractiveProjectionModel`, `project_multi`, `back_project_multi`
-- `src/aquacore/__init__.py` - Added projection import block (sorted between interface and refraction), four new names added to `__all__`
+- `src/aquakit/projection/protocol.py` - `@runtime_checkable ProjectionModel(Protocol)` with `project()` and `back_project()` method stubs and full docstrings
+- `src/aquakit/projection/refractive.py` - `RefractiveProjectionModel` class with all five methods plus `project_multi` and `back_project_multi` module functions
+- `src/aquakit/projection/__init__.py` - Replaced stub with proper exports: `ProjectionModel`, `RefractiveProjectionModel`, `project_multi`, `back_project_multi`
+- `src/aquakit/__init__.py` - Added projection import block (sorted between interface and refraction), four new names added to `__all__`
 
 ## Decisions Made
 
@@ -102,7 +102,7 @@ The only minor resolution was import ordering: the plan said to insert the proje
 ## Issues Encountered
 
 - Pre-commit ruff-format hook reformatted both `protocol.py` and `refractive.py` on first commit (CRLF/LF and minor whitespace). Re-staged and committed successfully on second attempt.
-- Ruff I001 (import sort) caught out-of-order projection import in `aquacore/__init__.py` on first lint run. Fixed by moving projection block alphabetically before refraction (p < r).
+- Ruff I001 (import sort) caught out-of-order projection import in `aquakit/__init__.py` on first lint run. Fixed by moving projection block alphabetically before refraction (p < r).
 
 ## Next Phase Readiness
 

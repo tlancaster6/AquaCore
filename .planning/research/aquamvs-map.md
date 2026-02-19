@@ -23,7 +23,7 @@ src/aquamvs/
 ├── dense/                      # Dense matching (plane sweep)
 ├── evaluation/                 # Evaluation metrics
 ├── pipeline/                   # End-to-end pipeline
-└── visualization/              # Plotting (excluded from AquaCore scope)
+└── visualization/              # Plotting (excluded from AquaKit scope)
 ```
 
 ---

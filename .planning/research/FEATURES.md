@@ -34,16 +34,16 @@ Features consumers (AquaCal, AquaMVS, AquaPose) assume exist. Missing these = li
 
 ### Differentiators (Competitive Advantage)
 
-Features that set AquaCore apart from generic camera geometry libraries (kornia, nvTorchCam, PyTorch3D). None of these exist in any open-source Python library today.
+Features that set AquaKit apart from generic camera geometry libraries (kornia, nvTorchCam, PyTorch3D). None of these exist in any open-source Python library today.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Physically correct flat-port refraction (full air→glass→water chain) | No existing Python/PyTorch library models the multi-layer refractive interface; this is AquaCore's raison d'être | HIGH | Must handle water, glass, and air IOR separately with two Snell applications; glass thickness is a parameter |
+| Physically correct flat-port refraction (full air→glass→water chain) | No existing Python/PyTorch library models the multi-layer refractive interface; this is AquaKit's raison d'être | HIGH | Must handle water, glass, and air IOR separately with two Snell applications; glass thickness is a parameter |
 | Newton-Raphson solver integrated into projection | Generic libraries (nvTorchCam) use closed-form distortion inversion; refractive projection has no closed form — the iterative solver *is* the differentiator | HIGH | Convergence parameters (max_iter, tolerance) are tunable; differentiable w.r.t. intrinsics for future calibration gradient flows |
 | AquaCal JSON calibration schema natively supported | Consumers don't need custom parsing; the loader is the exact format AquaCal produces | LOW-MEDIUM | Idiomatic schema knowledge baked in; not a generic YAML/JSON camera loader |
-| Device-parametrized test suite (CPU + CUDA) | Generic libraries test on CPU only; AquaCore validates GPU correctness for every geometry primitive | MEDIUM | pytest parametrize over `["cpu", "cuda"]`; catches `.float()` vs `.double()` bugs that only appear on GPU |
-| Known-value tests for refraction | Existing libraries have no tests against ground-truth Snell's law or underwater geometry oracle; AquaCore ships with analytically-derived expected values | MEDIUM | E.g., given ray, IOR, interface normal → verify refracted direction matches hand-calculated Snell's law result |
-| Synchronized multi-camera I/O with frame alignment | Most camera I/O libraries handle single cameras or assume hardware sync; AquaCore's FrameSet protocol provides a consistent abstraction over VideoSet (offline) and ImageSet (directory) | MEDIUM | Key for AquaPose which needs temporally aligned frames across 4+ cameras |
+| Device-parametrized test suite (CPU + CUDA) | Generic libraries test on CPU only; AquaKit validates GPU correctness for every geometry primitive | MEDIUM | pytest parametrize over `["cpu", "cuda"]`; catches `.float()` vs `.double()` bugs that only appear on GPU |
+| Known-value tests for refraction | Existing libraries have no tests against ground-truth Snell's law or underwater geometry oracle; AquaKit ships with analytically-derived expected values | MEDIUM | E.g., given ray, IOR, interface normal → verify refracted direction matches hand-calculated Snell's law result |
+| Synchronized multi-camera I/O with frame alignment | Most camera I/O libraries handle single cameras or assume hardware sync; AquaKit's FrameSet protocol provides a consistent abstraction over VideoSet (offline) and ImageSet (directory) | MEDIUM | Key for AquaPose which needs temporally aligned frames across 4+ cameras |
 | `create_camera` factory with model dispatch | Callers pass a calibration dict; the factory selects pinhole vs fisheye based on distortion model type | LOW | Eliminates boilerplate `if model == "fisheye": FisheyeCamera(...)` in every consumer |
 | Rewiring guide (old-import → new-import) | Migration from AquaCal/AquaMVS is documented; consumers can adopt incrementally without a big-bang rewrite | LOW | A mapping table in docs; not a code feature — but uniquely valuable for this ecosystem transition |
 
@@ -53,13 +53,13 @@ Features to explicitly NOT build in v1. These represent scope creep that would d
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| NumPy math wrappers (duplicating PyTorch ops in NumPy) | AquaCal is NumPy-based; developers may want drop-in replacements | Maintains two implementations, doubles test burden, blurs the PyTorch-first architecture decision. The whole point of AquaCore is one canonical PyTorch implementation | Consumers convert at their own boundaries: `torch.from_numpy()` / `.numpy()`. AquaCore exposes only PyTorch |
+| NumPy math wrappers (duplicating PyTorch ops in NumPy) | AquaCal is NumPy-based; developers may want drop-in replacements | Maintains two implementations, doubles test burden, blurs the PyTorch-first architecture decision. The whole point of AquaKit is one canonical PyTorch implementation | Consumers convert at their own boundaries: `torch.from_numpy()` / `.numpy()`. AquaKit exposes only PyTorch |
 | Online / live camera acquisition | I/O module might be expected to handle live streams (USB cams, GigE) | Introduces hardware dependencies, driver complexity, real-time threading — all outside the foundation library's scope. Turns a geometry library into a camera SDK | Use existing hardware I/O (pypylon, OpenCV VideoCapture) and wrap results in FrameSet at caller boundary |
-| Calibration optimization (bundle adjustment, parameter solving) | AquaCore ships calibration types — why not calibrate too? | Calibration optimization is AquaCal's job. Duplicating it creates split ownership and conflicts. AquaCore's role is *consuming* calibration data, not producing it | Keep `load_calibration_data` as read-only. AquaCal writes, AquaCore reads |
-| Dome port geometry | Dome ports are used in some underwater systems; papers cover it | Dome port geometry is substantially more complex (sphere intersection, decentering correction) and not used in the current Aqua ecosystem. Adds significant surface area for little benefit | Defer to v2 or a separate `aquacore.geometry.dome` submodule once flat port is battle-tested |
-| Synthetic data generation / rendering | AquaMVS needs synthetic training data eventually | Explicitly deferred to v2 in PROJECT.md. Requires scene description, photorealistic rendering, asset management — a separate project-sized scope | Implement as `aquacore.synthetic` in v2 milestone |
+| Calibration optimization (bundle adjustment, parameter solving) | AquaKit ships calibration types — why not calibrate too? | Calibration optimization is AquaCal's job. Duplicating it creates split ownership and conflicts. AquaKit's role is *consuming* calibration data, not producing it | Keep `load_calibration_data` as read-only. AquaCal writes, AquaKit reads |
+| Dome port geometry | Dome ports are used in some underwater systems; papers cover it | Dome port geometry is substantially more complex (sphere intersection, decentering correction) and not used in the current Aqua ecosystem. Adds significant surface area for little benefit | Defer to v2 or a separate `aquakit.geometry.dome` submodule once flat port is battle-tested |
+| Synthetic data generation / rendering | AquaMVS needs synthetic training data eventually | Explicitly deferred to v2 in PROJECT.md. Requires scene description, photorealistic rendering, asset management — a separate project-sized scope | Implement as `aquakit.synthetic` in v2 milestone |
 | Differentiable calibration gradient flows through projection | Researcher use case: jointly optimize IOR + pose using gradient descent | The Newton-Raphson solver can be made differentiable, but it significantly complicates the implementation and is not needed by AquaCal/AquaMVS/AquaPose v1 | Design RefractiveProjectionModel with gradient path in mind (don't block it), but don't test or document it in v1 |
-| Generic camera model plugin system | Extensible architecture for arbitrary projection models | Premature abstraction. AquaCore has two concrete models (pinhole, fisheye) and one specialized model (refractive). A plugin registry adds complexity before the API is stable | ProjectionModel Protocol is the extensibility point. New models are new classes implementing the Protocol — no registration system needed |
+| Generic camera model plugin system | Extensible architecture for arbitrary projection models | Premature abstraction. AquaKit has two concrete models (pinhole, fisheye) and one specialized model (refractive). A plugin registry adds complexity before the API is stable | ProjectionModel Protocol is the extensibility point. New models are new classes implementing the Protocol — no registration system needed |
 | Mobile / embedded targets | PyTorch Lite or ONNX export for edge deployment | Constraint violation: desktop Python only (PROJECT.md). TorchScript export of Newton-Raphson iterative solvers is non-trivial and would constrain implementation choices | If edge inference is needed later, implement a lookup-table approximation in a separate module |
 | Dataset classes (PyTorch Dataset subclasses) | AquaPose will need torch.utils.data.Dataset wrappers | Explicitly deferred to v2 (PROJECT.md). Datasets involve split logic, augmentation, annotation formats — a separate concern from I/O primitives | FrameSet/VideoSet/ImageSet provide the primitive building blocks; consumers wrap them in Dataset in their own codebase until v2 |
 
@@ -147,7 +147,7 @@ Features to add once v1 is consumed by AquaCal and AquaMVS.
 
 Features explicitly deferred from v1 scope.
 
-- [ ] Synthetic data generation (`aquacore.synthetic`) — requires rendering pipeline, scene descriptions
+- [ ] Synthetic data generation (`aquakit.synthetic`) — requires rendering pipeline, scene descriptions
 - [ ] PyTorch Dataset wrappers — requires knowing AquaPose's annotation format
 - [ ] Dome port geometry — requires validation rig for spherical refraction
 - [ ] Differentiable calibration gradient flows — requires differentiable Newton-Raphson testing harness
@@ -184,7 +184,7 @@ Features explicitly deferred from v1 scope.
 
 No direct open-source Python equivalent exists for this exact domain. The closest references:
 
-| Feature | kornia | nvTorchCam | OpenPTV | AquaCore Target |
+| Feature | kornia | nvTorchCam | OpenPTV | AquaKit Target |
 |---------|--------|------------|---------|-----------------|
 | Pinhole projection (PyTorch) | Yes (PinholeCamera) | Yes (PinholeCamera) | No (C core) | Yes |
 | Fisheye projection (PyTorch) | Partial (functional only, not unified model) | Yes (OpenCVFisheyeCamera) | No | Yes — OpenCV fisheye model |
@@ -197,7 +197,7 @@ No direct open-source Python equivalent exists for this exact domain. The closes
 | Online/live camera acquisition | No | No | Yes (hardware trigger) | Deliberately excluded |
 | Calibration optimization | Via kornia.geometry.calibration | No | Yes | Deliberately excluded (AquaCal's job) |
 
-**Key insight (MEDIUM confidence):** The refractive multi-camera geometry domain has active academic research (ICCV 2025W, ISPRS 2025) but no dominant open-source Python library. AquaCore is building in a gap. The closest ecosystem analogue is OpenPTV, which solves a related problem (3D particle tracking through water) in C with Python bindings, but uses different conventions and does not provide PyTorch tensors.
+**Key insight (MEDIUM confidence):** The refractive multi-camera geometry domain has active academic research (ICCV 2025W, ISPRS 2025) but no dominant open-source Python library. AquaKit is building in a gap. The closest ecosystem analogue is OpenPTV, which solves a related problem (3D particle tracking through water) in C with Python bindings, but uses different conventions and does not provide PyTorch tensors.
 
 ## Sources
 
@@ -211,5 +211,5 @@ No direct open-source Python equivalent exists for this exact domain. The closes
 - PyTorch3D cameras: [cameras · PyTorch3D](https://pytorch3d.org/docs/cameras) — HIGH confidence (official docs)
 
 ---
-*Feature research for: Refractive multi-camera geometry foundation library (AquaCore)*
+*Feature research for: Refractive multi-camera geometry foundation library (AquaKit)*
 *Researched: 2026-02-18*

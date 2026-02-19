@@ -19,7 +19,7 @@ re_verification: false
 
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
-| 1 | User can call `load_calibration_data("path/to/aquacal.json")` and get a `CalibrationData` object; aquacore is importable with AquaCal uninstalled | VERIFIED | `calibration.py` uses only `json`, `warnings`, `torch`, `pathlib`; no `aquacal` import anywhere in `src/`; integration test confirmed return type is `CalibrationData` |
+| 1 | User can call `load_calibration_data("path/to/aquacal.json")` and get a `CalibrationData` object; aquakit is importable with AquaCal uninstalled | VERIFIED | `calibration.py` uses only `json`, `warnings`, `torch`, `pathlib`; no `aquacal` import anywhere in `src/`; integration test confirmed return type is `CalibrationData` |
 | 2 | `CalibrationData.cameras` returns a `dict` of `CameraData` objects; each `CameraData` exposes typed `CameraIntrinsics`, `CameraExtrinsics`, and `InterfaceParams` fields | VERIFIED | `CameraData` dataclass composes `CameraIntrinsics` and `CameraExtrinsics`; `CalibrationData` carries `interface: InterfaceParams`; integration test confirmed `type(cam.intrinsics).__name__ == 'CameraIntrinsics'` |
 | 3 | User can call `compute_undistortion_maps(camera_data, image_size)` and get a map pair usable with `cv2.remap`; maps are on the correct device | VERIFIED | `compute_undistortion_maps` accepts `CameraData` directly; returns `tuple[np.ndarray, np.ndarray]` with shape `(H, W)` and dtype `float32`; dispatches pinhole vs fisheye; integration test confirmed `maps[0].shape == (480, 640)` |
 | 4 | User can call `undistort_image(image, maps)` and get an undistorted image tensor matching the source image shape | VERIFIED | `undistort_image` accepts `torch.Tensor`, internally calls `cv2.remap`, returns tensor on same device; integration test confirmed `out.shape == img.shape` and `out.dtype == torch.uint8` |
@@ -30,9 +30,9 @@ re_verification: false
 
 | Artifact | Expected | Status | Details |
 |----------|----------|--------|---------|
-| `src/aquacore/calibration.py` | `CameraData`, `CalibrationData` dataclasses and `load_calibration_data` function | VERIFIED | 259 lines; full implementation with `_parse_camera`, `_parse_intrinsics`, `_parse_extrinsics`, `_parse_interface`, `_extract_water_z` helpers; no stubs |
-| `src/aquacore/undistortion.py` | `compute_undistortion_maps` and `undistort_image` functions | VERIFIED | 88 lines; pinhole/fisheye dispatch via `is_fisheye` flag; PyTorch tensor I/O with `detach().cpu().numpy()` / `.to(device)` boundary |
-| `src/aquacore/__init__.py` | Public API exports for all Phase 3 symbols | VERIFIED | Exports `CalibrationData`, `CameraData`, `load_calibration_data`, `compute_undistortion_maps`, `undistort_image`; all present in `__all__` |
+| `src/aquakit/calibration.py` | `CameraData`, `CalibrationData` dataclasses and `load_calibration_data` function | VERIFIED | 259 lines; full implementation with `_parse_camera`, `_parse_intrinsics`, `_parse_extrinsics`, `_parse_interface`, `_extract_water_z` helpers; no stubs |
+| `src/aquakit/undistortion.py` | `compute_undistortion_maps` and `undistort_image` functions | VERIFIED | 88 lines; pinhole/fisheye dispatch via `is_fisheye` flag; PyTorch tensor I/O with `detach().cpu().numpy()` / `.to(device)` boundary |
+| `src/aquakit/__init__.py` | Public API exports for all Phase 3 symbols | VERIFIED | Exports `CalibrationData`, `CameraData`, `load_calibration_data`, `compute_undistortion_maps`, `undistort_image`; all present in `__all__` |
 | `tests/unit/test_calibration.py` | 25 tests for loader, validation, edge cases | VERIFIED | 283 lines; all 25 tests present and passing |
 | `tests/unit/test_undistortion.py` | 13 tests for undistortion pipeline | VERIFIED | 246 lines; all 13 tests present and passing |
 

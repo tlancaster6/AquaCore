@@ -14,14 +14,14 @@ from __future__ import annotations
 import pytest
 import torch
 
-from aquacore.camera import create_camera
-from aquacore.projection import (
+from aquakit.camera import create_camera
+from aquakit.projection import (
     RefractiveProjectionModel,
     back_project_multi,
     project_multi,
 )
-from aquacore.refraction import refractive_project
-from aquacore.types import (
+from aquakit.refraction import refractive_project
+from aquakit.types import (
     CameraExtrinsics,
     CameraIntrinsics,
     InterfaceParams,

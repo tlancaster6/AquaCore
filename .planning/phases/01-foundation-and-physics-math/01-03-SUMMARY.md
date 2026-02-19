@@ -35,12 +35,12 @@ tech-stack:
 
 key-files:
   created:
-    - src/aquacore/refraction.py
-    - src/aquacore/triangulation.py
+    - src/aquakit/refraction.py
+    - src/aquakit/triangulation.py
     - tests/unit/test_refraction.py
     - tests/unit/test_triangulation.py
   modified:
-    - src/aquacore/__init__.py
+    - src/aquakit/__init__.py
 
 key-decisions:
   - "snells_law_3d orients normal internally by checking sign of cos_i — caller does not need to pre-orient"
@@ -88,9 +88,9 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `src/aquacore/refraction.py` - snells_law_3d, trace_ray_air_to_water, trace_ray_water_to_air, refractive_project, refractive_back_project (5 public functions)
-- `src/aquacore/triangulation.py` - triangulate_rays, point_to_ray_distance (2 public functions)
-- `src/aquacore/__init__.py` - Added 7 new public exports; preserved create_camera from Plan 02; __all__ sorted
+- `src/aquakit/refraction.py` - snells_law_3d, trace_ray_air_to_water, trace_ray_water_to_air, refractive_project, refractive_back_project (5 public functions)
+- `src/aquakit/triangulation.py` - triangulate_rays, point_to_ray_distance (2 public functions)
+- `src/aquakit/__init__.py` - Added 7 new public exports; preserved create_camera from Plan 02; __all__ sorted
 - `tests/unit/test_refraction.py` - 15 known-value tests: Snell's law (7), ray tracing (6), projection (4), back-projection (3), covering physics invariants, TIR, convergence
 - `tests/unit/test_triangulation.py` - 9 tests: triangulation (5), point-to-ray (4), TRI-03 integration (1)
 
@@ -157,11 +157,11 @@ Each task was committed atomically:
 
 ## Self-Check: PASSED
 
-- src/aquacore/refraction.py: FOUND
-- src/aquacore/triangulation.py: FOUND
+- src/aquakit/refraction.py: FOUND
+- src/aquakit/triangulation.py: FOUND
 - tests/unit/test_refraction.py: FOUND
 - tests/unit/test_triangulation.py: FOUND
-- src/aquacore/__init__.py: FOUND
+- src/aquakit/__init__.py: FOUND
 - c64e393 (feat Task 1): FOUND
 - 382a87c (test Task 2): FOUND
 - ff3ec6e (docs metadata): FOUND

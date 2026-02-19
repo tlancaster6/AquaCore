@@ -14,7 +14,7 @@ All geometry primitives — types (CameraIntrinsics, CameraExtrinsics, Interface
 ## Implementation Decisions
 
 ### Guiding Principle: Unify Existing Implementations
-AquaCore v1 extracts and unifies existing behavior from AquaCal and AquaMVS. The default for any gray area is to match existing implementations unless there is a clear reason to diverge (broken, inconsistent, or undocumented behavior). Decisions are made case-by-case during planning, informed by researcher examination of both codebases.
+AquaKit v1 extracts and unifies existing behavior from AquaCal and AquaMVS. The default for any gray area is to match existing implementations unless there is a clear reason to diverge (broken, inconsistent, or undocumented behavior). Decisions are made case-by-case during planning, informed by researcher examination of both codebases.
 
 **Source repositories (same machine):**
 - AquaCal: `C:\Users\tucke\PycharmProjects\AquaCal`
@@ -54,8 +54,8 @@ The researcher should read these reference docs first, then dive into raw source
 <specifics>
 ## Specific Ideas
 
-- AquaCore v1 is a unification project, not a greenfield design. The researcher should examine AquaCal and AquaMVS source to understand existing behavior before any design decisions are finalized.
-- Eventual consumer migration should be smooth — API choices should minimize the delta between current AquaCal/AquaMVS usage and future AquaCore usage.
+- AquaKit v1 is a unification project, not a greenfield design. The researcher should examine AquaCal and AquaMVS source to understand existing behavior before any design decisions are finalized.
+- Eventual consumer migration should be smooth — API choices should minimize the delta between current AquaCal/AquaMVS usage and future AquaKit usage.
 
 </specifics>
 

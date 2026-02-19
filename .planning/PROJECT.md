@@ -1,4 +1,4 @@
-# AquaCore
+# AquaKit
 
 ## What This Is
 
@@ -45,7 +45,7 @@ Correct, tested PyTorch implementations of refractive multi-camera geometry (Sne
 
 ## Context
 
-- AquaCal geometry is NumPy; AquaMVS projection/triangulation is already PyTorch. AquaCore consolidates into PyTorch-only with NumPy at serialization boundaries only.
+- AquaCal geometry is NumPy; AquaMVS projection/triangulation is already PyTorch. AquaKit consolidates into PyTorch-only with NumPy at serialization boundaries only.
 - Coordinate system: World origin at reference camera optical center (+X right, +Y forward, +Z down into water). Camera frame: OpenCV convention. Extrinsics: `p_cam = R @ p_world + t`. Interface normal: `[0, 0, -1]`. Depth: ray depth, not world Z.
 - Device convention: follow input tensor device. No explicit `device` param, no hardcoded `.cuda()`.
 - Project skeleton already scaffolded: Hatch build system, Ruff linter, basedpyright type checker, GH Actions (test matrix: ubuntu+windows, Python 3.11-3.13), PyPI trusted publishing, semantic-release, Sphinx docs, Codecov.
@@ -67,7 +67,7 @@ Correct, tested PyTorch implementations of refractive multi-camera geometry (Sne
 | PyTorch-first, no NumPy math | One implementation, no duplication. Conversion cost negligible for calibration workloads. | — Pending |
 | Standalone tests only (no AquaCal oracle) | Removes test-time coupling. Known-value tests are more reliable long-term. | — Pending |
 | Datasets deferred to v2 | Keeps v1 focused on geometry foundation. AquaPose can start without datasets. | — Pending |
-| Rewiring guide, not rewiring | AquaCore ships independently. Consumer changes are a separate project. | — Pending |
+| Rewiring guide, not rewiring | AquaKit ships independently. Consumer changes are a separate project. | — Pending |
 | Device-follows-input convention | Low-level math follows tensor device. Consumers pass device from their config. | — Pending |
 
 ---

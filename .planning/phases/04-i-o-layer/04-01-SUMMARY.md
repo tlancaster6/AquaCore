@@ -11,10 +11,10 @@ requires:
 provides:
   - FrameSet runtime_checkable Protocol (5 methods, context manager)
   - ImageSet class satisfying FrameSet structurally
-  - aquacore.io public API (FrameSet, ImageSet)
+  - aquakit.io public API (FrameSet, ImageSet)
   - 15 ImageSet unit tests with synthetic image fixtures
 affects:
-  - 04-02 (VideoSet and create_frameset factory will extend aquacore.io)
+  - 04-02 (VideoSet and create_frameset factory will extend aquakit.io)
   - downstream consumers (AquaMVS, AquaPose) using FrameSet protocol
 
 # Tech tracking
@@ -29,12 +29,12 @@ tech-stack:
 
 key-files:
   created:
-    - src/aquacore/io/frameset.py
+    - src/aquakit/io/frameset.py
     - tests/unit/test_io/__init__.py
     - tests/unit/test_io/test_imageset.py
   modified:
-    - src/aquacore/io/images.py
-    - src/aquacore/io/__init__.py
+    - src/aquakit/io/images.py
+    - src/aquakit/io/__init__.py
 
 key-decisions:
   - "FrameSet is runtime_checkable Protocol with 5 methods: ImageSet does NOT inherit — structural typing only"
@@ -80,9 +80,9 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `src/aquacore/io/frameset.py` - FrameSet runtime_checkable Protocol with 5 methods and Google-style docstrings
-- `src/aquacore/io/images.py` - ImageSet class: validation, globbing with dedup, BGR->RGB conversion, full Protocol API
-- `src/aquacore/io/__init__.py` - Exports FrameSet and ImageSet from aquacore.io
+- `src/aquakit/io/frameset.py` - FrameSet runtime_checkable Protocol with 5 methods and Google-style docstrings
+- `src/aquakit/io/images.py` - ImageSet class: validation, globbing with dedup, BGR->RGB conversion, full Protocol API
+- `src/aquakit/io/__init__.py` - Exports FrameSet and ImageSet from aquakit.io
 - `tests/unit/test_io/__init__.py` - Empty package init for test_io subpackage
 - `tests/unit/test_io/test_imageset.py` - 15 tests with synthetic image fixtures using cv2.imwrite + tmp_path
 
@@ -101,7 +101,7 @@ Each task was committed atomically:
 - **Found during:** Task 2 (ImageSet tests — `test_imageset_construction` failed with `len == 10` instead of 5)
 - **Issue:** On Windows, `pathlib.Path.glob("*.png")` and `pathlib.Path.glob("*.PNG")` both match the same files (case-insensitive filesystem), doubling the frame count. The plan's extension list included both cases for Linux portability, but the deduplication step was missing.
 - **Fix:** Replaced the simple `files.extend(cam_dir.glob(ext))` loop with a `seen: dict[str, Path]` keyed by filename, using `setdefault` to keep only the first match per name. Produces a deduplicated, sorted file list on both Windows (case-insensitive) and Linux (case-sensitive).
-- **Files modified:** `src/aquacore/io/images.py`
+- **Files modified:** `src/aquakit/io/images.py`
 - **Verification:** `test_imageset_construction` passes with `len == 5`; all 15 tests pass; `hatch run test` shows 207 passed
 - **Committed in:** `fb440cc` (Task 2 commit)
 
@@ -120,17 +120,17 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 
-- `aquacore.io` is ready with `FrameSet` and `ImageSet` exported
-- Plan 02 will add `VideoSet`, `create_frameset`, and top-level `aquacore/__init__.py` exports
+- `aquakit.io` is ready with `FrameSet` and `ImageSet` exported
+- Plan 02 will add `VideoSet`, `create_frameset`, and top-level `aquakit/__init__.py` exports
 - No blockers; design validated by 15 passing tests
 
 ## Self-Check: PASSED
 
 | Check | Result |
 |-------|--------|
-| `src/aquacore/io/frameset.py` | FOUND |
-| `src/aquacore/io/images.py` | FOUND |
-| `src/aquacore/io/__init__.py` | FOUND |
+| `src/aquakit/io/frameset.py` | FOUND |
+| `src/aquakit/io/images.py` | FOUND |
+| `src/aquakit/io/__init__.py` | FOUND |
 | `tests/unit/test_io/__init__.py` | FOUND |
 | `tests/unit/test_io/test_imageset.py` | FOUND |
 | `.planning/phases/04-i-o-layer/04-01-SUMMARY.md` | FOUND |

@@ -1,6 +1,6 @@
 Triangulation
 =============
 
-.. automodule:: aquacore.triangulation
+.. automodule:: aquakit.triangulation
    :members:
    :undoc-members:

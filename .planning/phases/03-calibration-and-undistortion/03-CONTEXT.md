@@ -6,7 +6,7 @@
 <domain>
 ## Phase Boundary
 
-Load AquaCal JSON calibration files into typed Python objects and compute undistortion maps for images — all without requiring AquaCal as a dependency. CalibrationData composes existing AquaCore types (CameraIntrinsics, CameraExtrinsics, InterfaceParams). Creating calibrations, refining calibrations, and video/image I/O are separate phases.
+Load AquaCal JSON calibration files into typed Python objects and compute undistortion maps for images — all without requiring AquaCal as a dependency. CalibrationData composes existing AquaKit types (CameraIntrinsics, CameraExtrinsics, InterfaceParams). Creating calibrations, refining calibrations, and video/image I/O are separate phases.
 
 </domain>
 

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import torch
 
-from aquacore.projection import ProjectionModel, RefractiveProjectionModel
+from aquakit.projection import ProjectionModel, RefractiveProjectionModel
 
 # ---------------------------------------------------------------------------
 # Helpers

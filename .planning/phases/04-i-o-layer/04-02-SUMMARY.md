@@ -12,13 +12,13 @@ requires:
 provides:
   - VideoSet class satisfying FrameSet structurally (seek-based + sequential iteration)
   - create_frameset factory auto-detecting image dirs vs video files
-  - aquacore.io public API (FrameSet, ImageSet, VideoSet, create_frameset)
-  - aquacore top-level public API (all 4 I/O names re-exported)
+  - aquakit.io public API (FrameSet, ImageSet, VideoSet, create_frameset)
+  - aquakit top-level public API (all 4 I/O names re-exported)
   - 19 new tests: 13 VideoSet + 6 create_frameset factory
 
 affects:
   - downstream consumers (AquaMVS, AquaPose) using VideoSet for synchronized video I/O
-  - any code importing from aquacore top-level (4 new names now available)
+  - any code importing from aquakit top-level (4 new names now available)
 
 # Tech tracking
 tech-stack:
@@ -32,14 +32,14 @@ tech-stack:
 
 key-files:
   created:
-    - src/aquacore/io/video.py
+    - src/aquakit/io/video.py
     - tests/unit/test_io/conftest.py
     - tests/unit/test_io/test_videoset.py
     - tests/unit/test_io/test_factory.py
   modified:
-    - src/aquacore/io/images.py
-    - src/aquacore/io/__init__.py
-    - src/aquacore/__init__.py
+    - src/aquakit/io/images.py
+    - src/aquakit/io/__init__.py
+    - src/aquakit/__init__.py
 
 key-decisions:
   - "VideoSet does NOT inherit from FrameSet: structural typing only (same as ImageSet)"
@@ -61,7 +61,7 @@ completed: 2026-02-19
 
 # Phase 4 Plan 02: I/O Layer (VideoSet + Factory) Summary
 
-**VideoSet with seek-based random access, frame-exact sequential iteration with auto-reset, mid-init handle cleanup, and create_frameset factory that auto-detects image directories vs video files — completes the full aquacore.io public API with top-level re-exports**
+**VideoSet with seek-based random access, frame-exact sequential iteration with auto-reset, mid-init handle cleanup, and create_frameset factory that auto-detects image directories vs video files — completes the full aquakit.io public API with top-level re-exports**
 
 ## Performance
 
@@ -75,7 +75,7 @@ completed: 2026-02-19
 
 - Implemented `VideoSet` with `cv2.VideoCapture`-backed seek (`__getitem__`) and sequential iteration (`__iter__` resets all captures to frame 0), context manager releasing all handles on exit, and mid-init cleanup that releases already-opened captures if the constructor fails partway through
 - Added `create_frameset` factory to `images.py` that auto-detects input type: existing directories → `ImageSet`, existing files → `VideoSet`, nonexistent paths with video extensions → `VideoSet`, otherwise → `ImageSet`, mixed types → `ValueError`
-- Wired all 4 public names (`FrameSet`, `ImageSet`, `VideoSet`, `create_frameset`) into both `aquacore.io.__all__` and the top-level `aquacore.__all__` in alphabetical order
+- Wired all 4 public names (`FrameSet`, `ImageSet`, `VideoSet`, `create_frameset`) into both `aquakit.io.__all__` and the top-level `aquakit.__all__` in alphabetical order
 - Wrote 19 new tests: 13 `VideoSet` tests (construction, tensor format, iter indices, iter count, iter reset after seek, context manager cleanup, protocol compliance, missing file, directory path, index out of range, frame count mismatch warning, mid-init cleanup) and 6 `create_frameset` tests (image dirs, video files, empty map, mixed types, nonexistent video extension, nonexistent dir extension)
 
 ## Task Commits
@@ -87,10 +87,10 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `src/aquacore/io/video.py` - VideoSet class: validation, seek-based __getitem__, sequential __iter__ with frame-0 reset, context manager with handle release, mid-init cleanup
-- `src/aquacore/io/images.py` - Added `from .video import VideoSet`, `_VIDEO_EXTENSIONS` set, and `create_frameset` factory function at end of file
-- `src/aquacore/io/__init__.py` - Updated to export all 4 public names: FrameSet, ImageSet, VideoSet, create_frameset
-- `src/aquacore/__init__.py` - Added `from .io import FrameSet, ImageSet, VideoSet, create_frameset`; added 4 names to `__all__` in alphabetical order
+- `src/aquakit/io/video.py` - VideoSet class: validation, seek-based __getitem__, sequential __iter__ with frame-0 reset, context manager with handle release, mid-init cleanup
+- `src/aquakit/io/images.py` - Added `from .video import VideoSet`, `_VIDEO_EXTENSIONS` set, and `create_frameset` factory function at end of file
+- `src/aquakit/io/__init__.py` - Updated to export all 4 public names: FrameSet, ImageSet, VideoSet, create_frameset
+- `src/aquakit/__init__.py` - Added `from .io import FrameSet, ImageSet, VideoSet, create_frameset`; added 4 names to `__all__` in alphabetical order
 - `tests/unit/test_io/conftest.py` - `two_camera_video_files` fixture with mp4v/MJPG fallback
 - `tests/unit/test_io/test_videoset.py` - 13 VideoSet tests with synthetic video fixtures
 - `tests/unit/test_io/test_factory.py` - 6 create_frameset factory tests
@@ -130,8 +130,8 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 
-- `aquacore.io` is complete with all 4 public names exported: `FrameSet`, `ImageSet`, `VideoSet`, `create_frameset`
-- Top-level `aquacore` namespace now includes all I/O types alongside geometry math
+- `aquakit.io` is complete with all 4 public names exported: `FrameSet`, `ImageSet`, `VideoSet`, `create_frameset`
+- Top-level `aquakit` namespace now includes all I/O types alongside geometry math
 - `isinstance(VideoSet(...), FrameSet)` and `isinstance(ImageSet(...), FrameSet)` both return True
 - 226 tests pass across all phases; `hatch run check` passes with 0 errors/warnings
 - Phase 4 is complete. Phase 5 (if any) can consume the full I/O API without modification.
@@ -140,10 +140,10 @@ None - no external service configuration required.
 
 | Check | Result |
 |-------|--------|
-| `src/aquacore/io/video.py` | FOUND |
-| `src/aquacore/io/images.py` (create_frameset) | FOUND |
-| `src/aquacore/io/__init__.py` (4 exports) | FOUND |
-| `src/aquacore/__init__.py` (IO imports) | FOUND |
+| `src/aquakit/io/video.py` | FOUND |
+| `src/aquakit/io/images.py` (create_frameset) | FOUND |
+| `src/aquakit/io/__init__.py` (4 exports) | FOUND |
+| `src/aquakit/__init__.py` (IO imports) | FOUND |
 | `tests/unit/test_io/conftest.py` | FOUND |
 | `tests/unit/test_io/test_videoset.py` | FOUND |
 | `tests/unit/test_io/test_factory.py` | FOUND |

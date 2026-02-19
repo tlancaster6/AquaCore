@@ -1,4 +1,4 @@
-# AquaCore
+# AquaKit
 
 Refractive multi-camera geometry foundation for the Aqua ecosystem.
 

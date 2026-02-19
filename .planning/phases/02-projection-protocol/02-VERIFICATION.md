@@ -32,10 +32,10 @@ human_verification: []
 
 | Artifact | Expected | Status | Details |
 |----------|----------|--------|---------|
-| `src/aquacore/projection/protocol.py` | @runtime_checkable ProjectionModel Protocol | VERIFIED | 52 lines, @runtime_checkable decorator, project() and back_project() with correct signatures, Google-style docstrings |
-| `src/aquacore/projection/refractive.py` | RefractiveProjectionModel + multi-camera helpers | VERIFIED | 278 lines, __init__, from_camera, to, project, back_project, project_multi, back_project_multi all present and implemented |
-| `src/aquacore/projection/__init__.py` | Subpackage exports | VERIFIED | Exports ProjectionModel, RefractiveProjectionModel, back_project_multi, project_multi with __all__ |
-| `src/aquacore/__init__.py` | Top-level re-export | VERIFIED | All four projection names imported and in __all__, sorted alphabetically |
+| `src/aquakit/projection/protocol.py` | @runtime_checkable ProjectionModel Protocol | VERIFIED | 52 lines, @runtime_checkable decorator, project() and back_project() with correct signatures, Google-style docstrings |
+| `src/aquakit/projection/refractive.py` | RefractiveProjectionModel + multi-camera helpers | VERIFIED | 278 lines, __init__, from_camera, to, project, back_project, project_multi, back_project_multi all present and implemented |
+| `src/aquakit/projection/__init__.py` | Subpackage exports | VERIFIED | Exports ProjectionModel, RefractiveProjectionModel, back_project_multi, project_multi with __all__ |
+| `src/aquakit/__init__.py` | Top-level re-export | VERIFIED | All four projection names imported and in __all__, sorted alphabetically |
 | `tests/unit/test_projection/__init__.py` | Test package marker | VERIFIED | Present with docstring |
 | `tests/unit/test_projection/test_protocol.py` | Protocol compliance tests | VERIFIED | 113 lines, 4 tests: real model positive, dummy positive, missing back_project negative, missing project negative |
 | `tests/unit/test_projection/test_refractive.py` | RefractiveProjectionModel functional tests | VERIFIED | 414 lines, 14 device-parametrized tests covering SC-1, SC-2, SC-3, and additional edge cases |
@@ -46,9 +46,9 @@ human_verification: []
 |------|----|-----|--------|---------|
 | `projection/refractive.py` | `refraction.py` | `refractive_project()` delegation in project() | WIRED | Line 7: `from ..refraction import refractive_project`; Line 155: `P, _ = refractive_project(points, self.C, interface)` |
 | `projection/refractive.py` | `types.py` | `InterfaceParams` in from_camera() and project() | WIRED | Line 8: `from ..types import InterfaceParams`; used in from_camera() extraction (lines 94-98) and project() construction (lines 147-152) |
-| `aquacore/__init__.py` | `projection/__init__.py` | re-export projection public API | WIRED | Lines 7-12: `from .projection import (ProjectionModel, RefractiveProjectionModel, back_project_multi, project_multi)` |
-| `test_refractive.py` | `projection/refractive.py` | import and construct RefractiveProjectionModel | WIRED | Line 19: `from aquacore.projection import (RefractiveProjectionModel, ...)` |
-| `test_protocol.py` | `projection/protocol.py` | isinstance check against ProjectionModel | WIRED | Line 13: `from aquacore.projection import ProjectionModel, RefractiveProjectionModel`; line 51: `isinstance(model, ProjectionModel)` |
+| `aquakit/__init__.py` | `projection/__init__.py` | re-export projection public API | WIRED | Lines 7-12: `from .projection import (ProjectionModel, RefractiveProjectionModel, back_project_multi, project_multi)` |
+| `test_refractive.py` | `projection/refractive.py` | import and construct RefractiveProjectionModel | WIRED | Line 19: `from aquakit.projection import (RefractiveProjectionModel, ...)` |
+| `test_protocol.py` | `projection/protocol.py` | isinstance check against ProjectionModel | WIRED | Line 13: `from aquakit.projection import ProjectionModel, RefractiveProjectionModel`; line 51: `isinstance(model, ProjectionModel)` |
 
 ### Requirements Coverage
 

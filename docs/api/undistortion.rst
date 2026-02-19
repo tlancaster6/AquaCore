@@ -1,6 +1,6 @@
 Undistortion
 ============
 
-.. automodule:: aquacore.undistortion
+.. automodule:: aquakit.undistortion
    :members:
    :undoc-members:

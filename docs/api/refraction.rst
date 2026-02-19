@@ -1,6 +1,6 @@
 Refraction
 ==========
 
-.. automodule:: aquacore.refraction
+.. automodule:: aquakit.refraction
    :members:
    :undoc-members:

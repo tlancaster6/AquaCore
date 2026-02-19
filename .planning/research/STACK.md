@@ -21,7 +21,7 @@
 
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
-| kornia | >=0.8.2 | Differentiable image ops: color conversion, image filtering, warp affine, augmentation | Optional — use for image-level ops that would otherwise require writing custom CUDA kernels. Do NOT use kornia's camera geometry classes (`PinholeCamera`) as AquaCore has its own typed models. kornia 0.8.2 is current stable (2025-11-08). |
+| kornia | >=0.8.2 | Differentiable image ops: color conversion, image filtering, warp affine, augmentation | Optional — use for image-level ops that would otherwise require writing custom CUDA kernels. Do NOT use kornia's camera geometry classes (`PinholeCamera`) as AquaKit has its own typed models. kornia 0.8.2 is current stable (2025-11-08). |
 | NumPy | >=1.26 (pulled in by PyTorch transitively) | Serialization boundary only: JSON→ndarray→torch.tensor, OpenCV call inputs/outputs | Only at I/O and calibration load boundaries. Never use NumPy for geometry math — keep all intermediate computation in PyTorch. |
 | jaxtyping | >=0.2.35 | Shape + dtype annotations on public API (`Float[Tensor, "B 3"]`) | Use in all public function signatures where tensor shape is semantically meaningful. Pairs with beartype for optional runtime checking. Recommended over torchtyping (abandoned) and Annotated-shape hacks. Latest stable: ~0.2.38 (verify on PyPI before pinning). |
 | beartype | >=0.19 | Runtime type enforcement at development and test time | Optional, pairs with jaxtyping. Wrap test functions with `@beartype` to catch shape errors automatically. Do NOT add as a production dependency — keep optional or dev-only. |
@@ -62,7 +62,7 @@ jaxtyping>=0.2.35
 beartype>=0.19
 ```
 
-Full pyproject.toml `dependencies` block (for AquaCore as a distributable library):
+Full pyproject.toml `dependencies` block (for AquaKit as a distributable library):
 ```toml
 [project]
 dependencies = [
@@ -88,7 +88,7 @@ typing = ["jaxtyping>=0.2.35", "beartype>=0.19"]
 | `kornia` (optional) | Custom CUDA kernels | If kornia op is unavailable; but exhaust kornia first — it is already a declared optional dep. |
 | `kornia` (optional) | PyTorch3D | Never for this domain — PyTorch3D is a rendering-focused library, lacks undistortion, adds >500 MB of compiled CUDA extensions. Violates the "no heavy ML deps" constraint. |
 | `beartype` (optional dev) | `typeguard` | Either works; beartype is faster (O(1) checks), preferred in PyTorch ecosystem with jaxtyping. |
-| Hatch | uv | uv_build is better for new projects using uv as package manager. AquaCore is already Hatch-configured — switching would break existing CI/CD and provide no meaningful benefit. |
+| Hatch | uv | uv_build is better for new projects using uv as package manager. AquaKit is already Hatch-configured — switching would break existing CI/CD and provide no meaningful benefit. |
 | basedpyright (basic mode) | mypy | basedpyright is faster, already configured, has better PyTorch stub support via `pytorch-stubs`. mypy requires separate plugin for torch and has slower incremental checking. |
 | pytest parametrize devices | pytest-pytorch plugin | pytest-pytorch adds a dependency for functionality achievable with 3 lines of pytest marks. Avoid unnecessary deps in a library. |
 
@@ -124,7 +124,7 @@ typing = ["jaxtyping>=0.2.35", "beartype>=0.19"]
 **If kornia is available (optional dep):**
 - Use `kornia.geometry.transform.warp_perspective` for image warping
 - Use `kornia.enhance.*` for color-space conversion at I/O boundary
-- Do NOT use `kornia.geometry.camera.PinholeCamera` — AquaCore defines its own typed `Camera` model
+- Do NOT use `kornia.geometry.camera.PinholeCamera` — AquaKit defines its own typed `Camera` model
 
 **If tensor shape annotation is desired (optional typing extras):**
 - Use `jaxtyping.Float[torch.Tensor, "B 3"]` in function signatures
@@ -164,5 +164,5 @@ typing = ["jaxtyping>=0.2.35", "beartype>=0.19"]
 
 ---
 
-*Stack research for: AquaCore — refractive multi-camera geometry foundation library*
+*Stack research for: AquaKit — refractive multi-camera geometry foundation library*
 *Researched: 2026-02-18*

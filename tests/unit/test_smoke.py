@@ -1,7 +1,7 @@
 """Smoke tests for package import."""
 
-import aquacore
+import aquakit
 
 
 def test_version():
-    assert aquacore.__version__
+    assert aquakit.__version__

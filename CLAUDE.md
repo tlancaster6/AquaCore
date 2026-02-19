@@ -1,4 +1,4 @@
-# AquaCore
+# AquaKit
 
 Shared PyTorch geometry library for the Aqua ecosystem (AquaCal, AquaMVS, AquaPose). Implements refractive multi-camera geometry: Snell's law, camera models, triangulation, transforms, calibration loading, and synchronized I/O.
 
@@ -27,7 +27,7 @@ hatch run pre-commit run --all-files  # all pre-commit hooks
 ## Architecture
 
 ```
-src/aquacore/
+src/aquakit/
 ├── types.py              # Foundation: shared types (no math, no deps)
 ├── interface.py          # Air-water plane model
 ├── camera.py             # Camera models + create_camera factory

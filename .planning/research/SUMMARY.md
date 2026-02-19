@@ -1,13 +1,13 @@
 # Project Research Summary
 
-**Project:** AquaCore
+**Project:** AquaKit
 **Domain:** Refractive multi-camera geometry foundation library (Python/PyTorch)
 **Researched:** 2026-02-18
 **Confidence:** HIGH (stack, features, pitfalls), MEDIUM (architecture patterns)
 
 ## Executive Summary
 
-AquaCore is a PyTorch-first geometry foundation library that solves a domain gap no existing open-source Python library addresses: physically correct multi-layer refractive projection through a flat air-glass-water interface. The library is not a standalone application but a foundation consumed by three downstream projects (AquaCal, AquaMVS, AquaPose). This constrains the design in a critical way — AquaCore must be independently installable, produce no runtime dependency on any Aqua sibling, and expose an API stable enough that downstream consumers can type-annotate against Protocol interfaces rather than concrete classes. The recommended approach is a strict five-layer pyramid (types → math → physics → projection → calibration/IO) where every layer only imports from lower layers. All geometry math is implemented as pure PyTorch functions; the Newton-Raphson solver for refractive back-projection is the highest-complexity component and must be batched, out-of-place, and device-agnostic from day one.
+AquaKit is a PyTorch-first geometry foundation library that solves a domain gap no existing open-source Python library addresses: physically correct multi-layer refractive projection through a flat air-glass-water interface. The library is not a standalone application but a foundation consumed by three downstream projects (AquaCal, AquaMVS, AquaPose). This constrains the design in a critical way — AquaKit must be independently installable, produce no runtime dependency on any Aqua sibling, and expose an API stable enough that downstream consumers can type-annotate against Protocol interfaces rather than concrete classes. The recommended approach is a strict five-layer pyramid (types → math → physics → projection → calibration/IO) where every layer only imports from lower layers. All geometry math is implemented as pure PyTorch functions; the Newton-Raphson solver for refractive back-projection is the highest-complexity component and must be batched, out-of-place, and device-agnostic from day one.
 
 The stack decision is clear and well-constrained. PyTorch (>=2.6, pin 2.10) is the only viable choice for batched GPU-accelerated geometry with autograd. OpenCV headless (>=4.11) handles lens undistortion map computation. The existing Hatch/Ruff/basedpyright/pytest tooling should be kept as-is; switching to uv would provide no meaningful benefit and would break existing CI. The two optional additions that should be adopted are `jaxtyping` (shape-annotated public API) and `beartype` (dev/test runtime checking) — both kept as optional extras, not hard dependencies. NumPy is restricted to exactly two boundary crossings: AquaCal JSON deserialization in `calibration.py` and OpenCV image decode in `io/`.
 
@@ -17,7 +17,7 @@ The dominant risks are physics correctness bugs that produce wrong output withou
 
 ### Recommended Stack
 
-The stack is mature and already partially configured in `pyproject.toml`. The only additions required are declaring `torch>=2.6` and `opencv-python-headless>=4.11` as runtime dependencies. The complete runtime surface is intentionally small — PyTorch and OpenCV headless only. Everything else (kornia, jaxtyping, beartype) is optional. This restraint is a feature: AquaCore consumers must be able to install it without pulling in ML model weights or rendering engines.
+The stack is mature and already partially configured in `pyproject.toml`. The only additions required are declaring `torch>=2.6` and `opencv-python-headless>=4.11` as runtime dependencies. The complete runtime surface is intentionally small — PyTorch and OpenCV headless only. Everything else (kornia, jaxtyping, beartype) is optional. This restraint is a feature: AquaKit consumers must be able to install it without pulling in ML model weights or rendering engines.
 
 **Core technologies:**
 - Python >=3.11: `X | Y` union syntax, `match` statements, `tomllib` — minimum for clean type annotations; test matrix covers 3.11, 3.12, 3.13
@@ -60,7 +60,7 @@ The MVP (v1) feature set is well-defined. Eleven source files/modules constitute
 - Convergence diagnostics in Newton-Raphson (add in v1.x post-validation)
 
 **Defer (v2+):**
-- Synthetic data generation (`aquacore.synthetic`) — requires rendering pipeline
+- Synthetic data generation (`aquakit.synthetic`) — requires rendering pipeline
 - PyTorch Dataset wrappers — requires knowing AquaPose's annotation format
 - Dome port geometry — not in current Aqua ecosystem; spherical refraction is substantially more complex
 - Differentiable calibration gradient flows through Newton-Raphson — design to not block this, but don't test/document in v1
@@ -140,7 +140,7 @@ Based on research, the dependency order from ARCHITECTURE.md maps cleanly to fou
 
 ### Phase 3: Calibration Loader and Undistortion
 
-**Rationale:** The AquaCal JSON schema is the integration contract with the Aqua ecosystem. This phase depends on stable camera models (Phase 1) and produces the typed inputs that IO (Phase 4) binds to. The loader must be standalone — `import aquacore` must work with AquaCal uninstalled. This phase also resolves the most ambiguous external dependency: the exact AquaCal JSON schema, including `t` vector shape variants `(3,)` vs. `(3, 1)` and per-camera `water_z` consistency checks.
+**Rationale:** The AquaCal JSON schema is the integration contract with the Aqua ecosystem. This phase depends on stable camera models (Phase 1) and produces the typed inputs that IO (Phase 4) binds to. The loader must be standalone — `import aquakit` must work with AquaCal uninstalled. This phase also resolves the most ambiguous external dependency: the exact AquaCal JSON schema, including `t` vector shape variants `(3,)` vs. `(3, 1)` and per-camera `water_z` consistency checks.
 
 **Delivers:** `calibration.py` (CalibrationData, load_calibration_data, AquaCal JSON schema parsed directly), `undistortion.py` (compute_undistortion_maps, undistort_image).
 

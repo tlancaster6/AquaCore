@@ -51,7 +51,7 @@ Always compute `C = -R.T @ t` (or `-(R.T @ t)`). Never use `-R @ t`. Document th
 ### Pitfall 3: NumPy-to-PyTorch Migration Loses float64 Precision Where It Matters
 
 **What goes wrong:**
-The AquaCal implementation uses `float64` throughout. AquaMVS converts to `float32` for GPU efficiency. AquaCore must decide per-operation which precision is correct. Newton-Raphson for refractive projection converges to `1e-9` meters using `float64`; in `float32` the tolerance floor is around `1e-6` due to 7 decimal digits of precision. Triangulation with the linear least-squares system is numerically sensitive and can lose ~3 orders of magnitude of accuracy in `float32`. Silently downgrading to `float32` throughout produces wrong results that pass coarse tests.
+The AquaCal implementation uses `float64` throughout. AquaMVS converts to `float32` for GPU efficiency. AquaKit must decide per-operation which precision is correct. Newton-Raphson for refractive projection converges to `1e-9` meters using `float64`; in `float32` the tolerance floor is around `1e-6` due to 7 decimal digits of precision. Triangulation with the linear least-squares system is numerically sensitive and can lose ~3 orders of magnitude of accuracy in `float32`. Silently downgrading to `float32` throughout produces wrong results that pass coarse tests.
 
 **Why it happens:**
 PyTorch defaults to `float32`. When porting NumPy (float64) code, `torch.tensor(numpy_array)` does NOT preserve float64 — it produces float32 by default. Developers assume parity with NumPy because the code looks identical.
@@ -84,7 +84,7 @@ Use out-of-place operations throughout the Newton-Raphson loop: `r_p = torch.cla
 - Gradients are all zero when `requires_grad=True` inputs flow through the solver.
 - Test passes without `requires_grad` but fails when gradient tape is active.
 
-**Phase to address:** Geometry foundation phase. If AquaCore will ever be used in a gradient-based optimizer (calibration refinement), this must be correct from the start. Even if not, it is a correctness invariant worth maintaining.
+**Phase to address:** Geometry foundation phase. If AquaKit will ever be used in a gradient-based optimizer (calibration refinement), this must be correct from the start. Even if not, it is a correctness invariant worth maintaining.
 
 ---
 
@@ -131,7 +131,7 @@ Test round-trip consistency (`project` → `back_project`) for cameras at severa
 ### Pitfall 7: Depth Convention Confusion — Ray Depth vs. World Z
 
 **What goes wrong:**
-AquaCore defines depth as *ray depth* — distance along the refracted ray from the interface origin, not world Z-coordinate. The relationship is `point = origin + d * direction`. Code (or consumers) that conflates ray depth with world `Z - water_z` produces wrong 3D reconstructions: for oblique rays, `d * cos(theta_refracted)` is the world depth, not `d`. Mixing the two in the plane-sweep stereo or depth range computation produces silently incorrect results.
+AquaKit defines depth as *ray depth* — distance along the refracted ray from the interface origin, not world Z-coordinate. The relationship is `point = origin + d * direction`. Code (or consumers) that conflates ray depth with world `Z - water_z` produces wrong 3D reconstructions: for oblique rays, `d * cos(theta_refracted)` is the world depth, not `d`. Mixing the two in the plane-sweep stereo or depth range computation produces silently incorrect results.
 
 **Why it happens:**
 For cameras looking straight down (no tilt, normal-incidence rays), `ray_depth ≈ world_depth` because `cos(theta) ≈ 1`. Tests with overhead cameras never expose the discrepancy. The distinction only surfaces for off-axis pixels or tilted cameras.
@@ -154,12 +154,12 @@ Shortcuts that seem reasonable but create long-term problems.
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Copy NumPy implementation as-is, wrap in `torch.from_numpy` at boundaries | Fast port, avoids rewrite | Mixed NumPy/PyTorch code path, CUDA path untested, dtype inconsistencies | Never — defeats purpose of AquaCore |
+| Copy NumPy implementation as-is, wrap in `torch.from_numpy` at boundaries | Fast port, avoids rewrite | Mixed NumPy/PyTorch code path, CUDA path untested, dtype inconsistencies | Never — defeats purpose of AquaKit |
 | Hardcode `n_water = 1.333` everywhere | Removes a parameter | Cannot model seawater (n≈1.341) or temperature variation; silently wrong at scale | Only in tests with explicit comment |
 | Hardcode `device = "cpu"` in helper functions | Tests pass everywhere | Fails on CUDA with no warning; conceals device propagation bugs | Never |
 | Use `numpy.ndarray` in intermediate geometry ops for "speed" | Avoids PyTorch overhead for small inputs | Breaks device-agnostic convention, forces CPU execution, breaks autograd | Never in public API |
 | Skip back-projection test (only test projection) | Simpler test suite | Round-trip consistency (the only verifiable invariant for correct geometry) is not validated | Never — both directions must be tested |
-| Reuse AquaCal's `Interface` dataclass via dependency | Avoids redefining types | Creates runtime dependency on AquaCal; consumers need both packages | Never — AquaCore must be standalone |
+| Reuse AquaCal's `Interface` dataclass via dependency | Avoids redefining types | Creates runtime dependency on AquaCal; consumers need both packages | Never — AquaKit must be standalone |
 
 ---
 
@@ -202,7 +202,7 @@ Things that appear complete but are missing critical pieces.
 - [ ] **Offset cameras (non-origin XY):** Round-trip `project` → `back_project` with cameras at 0.3 m XY offset — not just cameras at world origin.
 - [ ] **Fisheye undistort path:** `cv2.fisheye.undistortPoints` is separate from `cv2.undistortPoints`; ensure `FisheyeCamera` calls the correct one.
 - [ ] **`t` vector shape:** AquaCal serializes `t` as either `(3,)` or `(3, 1)` depending on how it was stored. The loader must handle both shapes (`squeeze()` before use).
-- [ ] **Calibration loader standalone:** `load_calibration_data` in AquaCore must not import from `aquacal` at runtime. The JSON format must be parsed directly.
+- [ ] **Calibration loader standalone:** `load_calibration_data` in AquaKit must not import from `aquacal` at runtime. The JSON format must be parsed directly.
 - [ ] **`water_z` scalar vs. tensor:** In `RefractiveProjectionModel.cast_ray`, `(self.water_z - self.C[2])` is float - tensor, which PyTorch allows, but `torch.full_like(px, self.water_z)` must verify `self.water_z` is a Python float, not a 0-dim tensor on the wrong device.
 - [ ] **Round-trip at non-axis points:** Test points with both X and Y offsets from the camera's XY position, not just X-only or Y-only.
 - [ ] **Batch batch-size=1:** Batch functions with N=1 input can silently broadcast incorrectly — test N=1 explicitly alongside N=100.
@@ -221,7 +221,7 @@ When pitfalls occur despite prevention, how to recover.
 | In-place mutation breaking autograd | LOW | Replace `tensor[mask] = value` and `tensor.clamp_()` with out-of-place equivalents; no logic change |
 | Device mismatch discovered in CUDA testing | LOW-MEDIUM | Audit all tensor creation calls in affected functions; add `device=` args; covered by device-parametrized tests |
 | Offset camera bug (stalled at TIR boundary) | MEDIUM | Add convergence check on `f(r_p_final)` and return `NaN` on non-convergence; add offset-camera round-trip test as regression |
-| AquaCore accidentally imports AquaCal at runtime | HIGH | Refactor loader to parse JSON directly; update all tests to avoid AquaCal; potentially requires new JSON schema constants |
+| AquaKit accidentally imports AquaCal at runtime | HIGH | Refactor loader to parse JSON directly; update all tests to avoid AquaCal; potentially requires new JSON schema constants |
 
 ---
 
@@ -238,7 +238,7 @@ How roadmap phases should address these pitfalls.
 | Device mismatch | Geometry foundation phase | Device-parametrized pytest fixture (cpu + cuda) |
 | Offset camera TIR stall | Geometry foundation phase | Round-trip test grid over camera XY offsets |
 | Depth convention confusion | Geometry foundation phase | Oblique ray: verify `origin + d * dir == point_3d` |
-| Calibration loader coupling | I/O and calibration loader phase | Import test: `import aquacore` with AquaCal uninstalled |
+| Calibration loader coupling | I/O and calibration loader phase | Import test: `import aquakit` with AquaCal uninstalled |
 | Batch size=1 broadcasting | Geometry foundation phase | Explicit N=1 test case for all batch functions |
 | OpenCV fisheye D shape | Camera models phase | Fisheye project/back-project round-trip |
 
@@ -260,5 +260,5 @@ How roadmap phases should address these pitfalls.
 - Computer vision conventions blog: ["Camera Conventions, Transforms, and Conversions"](https://blog.mkari.de/posts/cam-transform/) — 2,556 ways to get transforms wrong; duality of pose vs. change-of-coordinates
 
 ---
-*Pitfalls research for: Refractive multi-camera geometry foundation library (AquaCore)*
+*Pitfalls research for: Refractive multi-camera geometry foundation library (AquaKit)*
 *Researched: 2026-02-18*

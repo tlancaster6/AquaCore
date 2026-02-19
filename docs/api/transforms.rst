@@ -1,6 +1,6 @@
 Transforms
 ==========
 
-.. automodule:: aquacore.transforms
+.. automodule:: aquakit.transforms
    :members:
    :undoc-members:

@@ -1,6 +1,6 @@
 Interface
 =========
 
-.. automodule:: aquacore.interface
+.. automodule:: aquakit.interface
    :members:
    :undoc-members:

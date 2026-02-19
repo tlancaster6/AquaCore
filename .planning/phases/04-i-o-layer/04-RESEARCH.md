@@ -2,7 +2,7 @@
 
 **Researched:** 2026-02-18
 **Domain:** Synchronized multi-camera frame I/O — OpenCV video/image reading, Python Protocol, PyTorch tensor conversion
-**Confidence:** HIGH — research drawn from AquaMVS reference implementation (readable on this machine) and existing AquaCore patterns
+**Confidence:** HIGH — research drawn from AquaMVS reference implementation (readable on this machine) and existing AquaKit patterns
 
 ---
 
@@ -32,7 +32,7 @@
 - Internally converts all paths to `Path` objects
 - One video file per camera (no multi-camera-in-one-file support)
 - **Factory function** `create_frameset(camera_map)` auto-detects images vs video from paths and returns the appropriate concrete class
-- No CalibrationData coupling — camera-to-path mapping is established by consumer repos (AquaCal init, AquaMVS init), not AquaCore
+- No CalibrationData coupling — camera-to-path mapping is established by consumer repos (AquaCal init, AquaMVS init), not AquaKit
 
 **Frame mismatch & errors:**
 - **Mismatched frame counts:** warn and use minimum count (not ValueError like AquaMVS)
@@ -74,7 +74,7 @@ The only Claude's discretion area that significantly affects architecture is **f
 |---------|---------|---------|--------------|
 | opencv-python | >=4.8 | cv2.imread, cv2.VideoCapture — only library providing both video seek and image directory reading | Already in pyproject.toml; the AquaMVS reference uses it directly |
 | torch | >=2.0 | Tensor output format, `.permute()`, `.float()`, `.clone()` | Project-wide requirement; the output contract is PyTorch tensors |
-| pathlib.Path | stdlib | Path normalization in constructors | Used uniformly across all AquaCore modules |
+| pathlib.Path | stdlib | Path normalization in constructors | Used uniformly across all AquaKit modules |
 | warnings | stdlib | Warn on frame count mismatch, corrupt frames | Already chosen in Phase 3 for library warnings; consistent |
 | logging | stdlib | Operational info messages (frame counts, camera counts) | Already used in AquaMVS io.py; appropriate for debug/info messages |
 | typing.Protocol, runtime_checkable | stdlib | FrameSet protocol definition | Same pattern as Phase 2's ProjectionModel; consistent |
@@ -105,7 +105,7 @@ The only Claude's discretion area that significantly affects architecture is **f
 Phase 4 fills three stubs plus updates two `__init__.py` files:
 
 ```
-src/aquacore/
+src/aquakit/
 └── io/
     ├── __init__.py     # Exports: FrameSet, VideoSet, ImageSet, create_frameset
     ├── frameset.py     # FrameSet Protocol (runtime_checkable)
@@ -113,11 +113,11 @@ src/aquacore/
     └── images.py       # ImageSet implementation + create_frameset factory
 ```
 
-Top-level `src/aquacore/__init__.py` adds FrameSet, VideoSet, ImageSet, create_frameset to public API.
+Top-level `src/aquakit/__init__.py` adds FrameSet, VideoSet, ImageSet, create_frameset to public API.
 
 ### Pattern 1: FrameSet as runtime_checkable Protocol
 
-**What:** `FrameSet` is a `typing.Protocol` decorated with `@runtime_checkable` — exactly the same pattern as `ProjectionModel` from Phase 2 (`src/aquacore/projection/protocol.py`). Concrete classes implement the protocol structurally without inheriting from it.
+**What:** `FrameSet` is a `typing.Protocol` decorated with `@runtime_checkable` — exactly the same pattern as `ProjectionModel` from Phase 2 (`src/aquakit/projection/protocol.py`). Concrete classes implement the protocol structurally without inheriting from it.
 
 **When to use:** Always — this is the locked design. The Protocol enables duck typing: code written against `FrameSet` type-checks with both `VideoSet` and `ImageSet` without modification.
 
@@ -460,7 +460,7 @@ def create_frameset(camera_map: dict[str, str | Path]) -> "ImageSet | VideoSet":
 
 ### Pattern 5: BGR to (C, H, W) float32 [0, 1] Tensor Conversion
 
-**What:** The critical conversion path from OpenCV output to AquaCore's tensor format. This is not in AquaMVS (which returns NumPy) so it must be implemented fresh.
+**What:** The critical conversion path from OpenCV output to AquaKit's tensor format. This is not in AquaMVS (which returns NumPy) so it must be implemented fresh.
 
 **Steps:**
 1. `bgr[..., ::-1]` — reverse channel axis: BGR→RGB. This creates a **view with a negative stride**.
@@ -485,7 +485,7 @@ def _bgr_to_tensor(bgr: np.ndarray) -> torch.Tensor:
 ### Recommended Project Structure
 
 ```
-src/aquacore/
+src/aquakit/
 └── io/
     ├── __init__.py     # from .frameset import FrameSet; from .video import VideoSet;
     │                   # from .images import ImageSet, create_frameset
@@ -710,8 +710,8 @@ def two_camera_image_dirs(tmp_path: Path) -> dict[str, Path]:
 
 ```python
 # Source: Phase 2 protocol compliance test pattern (test_projection/test_protocol.py)
-from aquacore.io.frameset import FrameSet
-from aquacore.io.images import ImageSet
+from aquakit.io.frameset import FrameSet
+from aquakit.io.images import ImageSet
 
 def test_imageset_satisfies_frameset_protocol(two_camera_image_dirs):
     with ImageSet(two_camera_image_dirs) as img_set:
@@ -725,7 +725,7 @@ def test_imageset_satisfies_frameset_protocol(two_camera_image_dirs):
 ```python
 # Source: test_undistortion.py shape/dtype pattern
 import torch
-from aquacore.io.images import ImageSet
+from aquakit.io.images import ImageSet
 
 def test_imageset_tensor_format(two_camera_image_dirs):
     with ImageSet(two_camera_image_dirs) as img_set:
@@ -758,15 +758,15 @@ __all__ = ["FrameSet", "ImageSet", "VideoSet", "create_frameset"]
 
 | Old Approach | Current Approach | When Changed | Impact |
 |--------------|------------------|--------------|--------|
-| AquaMVS: `ImageDirectorySet.read_frame()` returns `dict[str, np.ndarray]` (H,W,3) uint8 | AquaCore: `ImageSet.__getitem__()` returns `dict[str, Tensor]` (C,H,W) float32 [0,1] | Phase 4 (this phase) | AquaCore frames are ML-ready without further conversion |
-| AquaMVS: `iterate_frames(start, stop, step)` method | AquaCore: standard `__iter__` yielding `(idx, dict)` tuples | Phase 4 (this phase) | Enables `for idx, frames in image_set:` syntax; compatible with Python iteration protocol |
-| AquaMVS: no VideoSet implementation | AquaCore: VideoSet with cv2.VideoCapture | Phase 4 (this phase) | AquaPose sequential video processing supported |
-| AquaMVS: no FrameSet protocol | AquaCore: `FrameSet` runtime_checkable Protocol | Phase 4 (this phase) | Code written against FrameSet type-checks with both concrete classes |
-| AquaMVS: `detect_input_type()` returns string "images"/"video" | AquaCore: `create_frameset()` returns concrete instance | Phase 4 (this phase) | Factory returns ready-to-use object; caller doesn't dispatch on string |
+| AquaMVS: `ImageDirectorySet.read_frame()` returns `dict[str, np.ndarray]` (H,W,3) uint8 | AquaKit: `ImageSet.__getitem__()` returns `dict[str, Tensor]` (C,H,W) float32 [0,1] | Phase 4 (this phase) | AquaKit frames are ML-ready without further conversion |
+| AquaMVS: `iterate_frames(start, stop, step)` method | AquaKit: standard `__iter__` yielding `(idx, dict)` tuples | Phase 4 (this phase) | Enables `for idx, frames in image_set:` syntax; compatible with Python iteration protocol |
+| AquaMVS: no VideoSet implementation | AquaKit: VideoSet with cv2.VideoCapture | Phase 4 (this phase) | AquaPose sequential video processing supported |
+| AquaMVS: no FrameSet protocol | AquaKit: `FrameSet` runtime_checkable Protocol | Phase 4 (this phase) | Code written against FrameSet type-checks with both concrete classes |
+| AquaMVS: `detect_input_type()` returns string "images"/"video" | AquaKit: `create_frameset()` returns concrete instance | Phase 4 (this phase) | Factory returns ready-to-use object; caller doesn't dispatch on string |
 
 **Deprecated/outdated:**
-- `read_frame()` / `iterate_frames()` names: AquaMVS API. AquaCore uses `__getitem__` / `__iter__`. Consumers porting from AquaMVS must update call sites.
-- NumPy image return type: AquaMVS returns `np.ndarray`. AquaCore returns `torch.Tensor`. Consumers using `images["cam0"]` will get a different type.
+- `read_frame()` / `iterate_frames()` names: AquaMVS API. AquaKit uses `__getitem__` / `__iter__`. Consumers porting from AquaMVS must update call sites.
+- NumPy image return type: AquaMVS returns `np.ndarray`. AquaKit returns `torch.Tensor`. Consumers using `images["cam0"]` will get a different type.
 
 ---
 
@@ -803,10 +803,10 @@ Rationale: Matches the Phase 3 pattern exactly. `warnings` for data quality; `lo
    - What's unclear: Should an empty dict (all cameras failed) be yielded or silently skipped?
    - Recommendation: Yield empty dicts and let the consumer handle them. This preserves frame index semantics — `idx` always matches the actual position, even if no cameras produced a frame. Document this behavior.
 
-2. **Should `io/__init__.py` re-export `create_frameset` or should the top-level `aquacore/__init__.py` be the only public entry point?**
-   - What we know: The `projection/__init__.py` re-exports `project_multi` and `back_project_multi` (helper functions) in addition to the protocol and model. Consumers import from `aquacore` directly.
-   - What's unclear: Whether `from aquacore.io import ImageSet` should work in addition to `from aquacore import ImageSet`.
-   - Recommendation: Export from both. `io/__init__.py` exports the full subpackage surface; `aquacore/__init__.py` re-exports the same names for top-level access. This matches the `projection/` subpackage pattern.
+2. **Should `io/__init__.py` re-export `create_frameset` or should the top-level `aquakit/__init__.py` be the only public entry point?**
+   - What we know: The `projection/__init__.py` re-exports `project_multi` and `back_project_multi` (helper functions) in addition to the protocol and model. Consumers import from `aquakit` directly.
+   - What's unclear: Whether `from aquakit.io import ImageSet` should work in addition to `from aquakit import ImageSet`.
+   - Recommendation: Export from both. `io/__init__.py` exports the full subpackage surface; `aquakit/__init__.py` re-exports the same names for top-level access. This matches the `projection/` subpackage pattern.
 
 3. **`__iter__` type annotation: `Iterator` vs `Generator`**
    - What we know: The method uses `yield`, making it a generator function. Its return type could be annotated as `Iterator[tuple[int, dict[str, Tensor]]]` or `Generator[tuple[int, dict[str, Tensor]], None, None]`.
@@ -819,22 +819,22 @@ Rationale: Matches the Phase 3 pattern exactly. `warnings` for data quality; `lo
 ### Primary (HIGH confidence — direct source code inspection on this machine)
 
 - `C:/Users/tucke/PycharmProjects/AquaMVS/src/aquamvs/io.py` — Complete reference: `ImageDirectorySet` class, `detect_input_type()` function, image extension patterns, sorted filename matching, cv2.imread error handling, context manager pattern
-- `C:/Users/tucke/PycharmProjects/AquaCore/src/aquacore/projection/protocol.py` — ProjectionModel Protocol pattern: `@runtime_checkable`, method signatures, no inheritance requirement
-- `C:/Users/tucke/PycharmProjects/AquaCore/src/aquacore/io/frameset.py` — Current stub (empty); confirms file location and module docstring convention
-- `C:/Users/tucke/PycharmProjects/AquaCore/src/aquacore/io/video.py` — Current stub (empty)
-- `C:/Users/tucke/PycharmProjects/AquaCore/src/aquacore/io/images.py` — Current stub (empty)
-- `C:/Users/tucke/PycharmProjects/AquaCore/src/aquacore/io/__init__.py` — Current stub with empty `__all__`
-- `C:/Users/tucke/PycharmProjects/AquaCore/src/aquacore/__init__.py` — Current top-level API; will need FrameSet, VideoSet, ImageSet, create_frameset additions
-- `C:/Users/tucke/PycharmProjects/AquaCore/src/aquacore/undistortion.py` — Established OpenCV boundary pattern: `.detach().cpu().numpy()` → cv2 operation → `torch.from_numpy().to(device)`
-- `C:/Users/tucke/PycharmProjects/AquaCore/tests/conftest.py` — Device fixture pattern
-- `C:/Users/tucke/PycharmProjects/AquaCore/tests/unit/test_undistortion.py` — Test structure reference: fixtures, shape/dtype assertions, synthetic data
-- `C:/Users/tucke/PycharmProjects/AquaCore/pyproject.toml` — Dependencies (opencv-python>=4.8, numpy>=1.24, torch via hatch env); Python 3.11+; no new deps needed
+- `C:/Users/tucke/PycharmProjects/AquaKit/src/aquakit/projection/protocol.py` — ProjectionModel Protocol pattern: `@runtime_checkable`, method signatures, no inheritance requirement
+- `C:/Users/tucke/PycharmProjects/AquaKit/src/aquakit/io/frameset.py` — Current stub (empty); confirms file location and module docstring convention
+- `C:/Users/tucke/PycharmProjects/AquaKit/src/aquakit/io/video.py` — Current stub (empty)
+- `C:/Users/tucke/PycharmProjects/AquaKit/src/aquakit/io/images.py` — Current stub (empty)
+- `C:/Users/tucke/PycharmProjects/AquaKit/src/aquakit/io/__init__.py` — Current stub with empty `__all__`
+- `C:/Users/tucke/PycharmProjects/AquaKit/src/aquakit/__init__.py` — Current top-level API; will need FrameSet, VideoSet, ImageSet, create_frameset additions
+- `C:/Users/tucke/PycharmProjects/AquaKit/src/aquakit/undistortion.py` — Established OpenCV boundary pattern: `.detach().cpu().numpy()` → cv2 operation → `torch.from_numpy().to(device)`
+- `C:/Users/tucke/PycharmProjects/AquaKit/tests/conftest.py` — Device fixture pattern
+- `C:/Users/tucke/PycharmProjects/AquaKit/tests/unit/test_undistortion.py` — Test structure reference: fixtures, shape/dtype assertions, synthetic data
+- `C:/Users/tucke/PycharmProjects/AquaKit/pyproject.toml` — Dependencies (opencv-python>=4.8, numpy>=1.24, torch via hatch env); Python 3.11+; no new deps needed
 
 ### Secondary (MEDIUM confidence)
 
-- `C:/Users/tucke/PycharmProjects/AquaCore/.planning/research/aquamvs-map.md` — Pre-mapped AquaMVS I/O patterns: ImageDirectorySet class summary, calibration pattern
-- `C:/Users/tucke/PycharmProjects/AquaCore/.planning/research/shared-patterns.md` — Cross-repo conventions: OpenCV boundary, device handling
-- `C:/Users/tucke/PycharmProjects/AquaCore/.planning/phases/04-i-o-layer/04-CONTEXT.md` — Locked decisions and Claude's discretion areas
+- `C:/Users/tucke/PycharmProjects/AquaKit/.planning/research/aquamvs-map.md` — Pre-mapped AquaMVS I/O patterns: ImageDirectorySet class summary, calibration pattern
+- `C:/Users/tucke/PycharmProjects/AquaKit/.planning/research/shared-patterns.md` — Cross-repo conventions: OpenCV boundary, device handling
+- `C:/Users/tucke/PycharmProjects/AquaKit/.planning/phases/04-i-o-layer/04-CONTEXT.md` — Locked decisions and Claude's discretion areas
 
 ### Tertiary (LOW confidence — none needed; all claims sourced from code)
 

@@ -33,15 +33,15 @@ tech-stack:
 
 key-files:
   created:
-    - src/aquacore/types.py
-    - src/aquacore/interface.py
-    - src/aquacore/transforms.py
+    - src/aquakit/types.py
+    - src/aquakit/interface.py
+    - src/aquakit/transforms.py
     - tests/conftest.py
     - tests/unit/test_types.py
     - tests/unit/test_transforms.py
     - tests/unit/test_interface.py
   modified:
-    - src/aquacore/__init__.py
+    - src/aquakit/__init__.py
 
 key-decisions:
   - "Pure-PyTorch Rodrigues (not cv2.Rodrigues) — enables GPU/autograd, handles theta=0 and theta=pi edge cases explicitly"
@@ -87,10 +87,10 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `src/aquacore/types.py` - Vec2/Vec3/Mat3 aliases, INTERFACE_NORMAL, CameraIntrinsics, CameraExtrinsics (with C property), InterfaceParams dataclasses
-- `src/aquacore/interface.py` - ray_plane_intersection(origins, directions, plane_normal, plane_d) -> (points, valid)
-- `src/aquacore/transforms.py` - rvec_to_matrix, matrix_to_rvec, compose_poses, invert_pose, camera_center
-- `src/aquacore/__init__.py` - Public API re-exports and sorted __all__
+- `src/aquakit/types.py` - Vec2/Vec3/Mat3 aliases, INTERFACE_NORMAL, CameraIntrinsics, CameraExtrinsics (with C property), InterfaceParams dataclasses
+- `src/aquakit/interface.py` - ray_plane_intersection(origins, directions, plane_normal, plane_d) -> (points, valid)
+- `src/aquakit/transforms.py` - rvec_to_matrix, matrix_to_rvec, compose_poses, invert_pose, camera_center
+- `src/aquakit/__init__.py` - Public API re-exports and sorted __all__
 - `tests/conftest.py` - Shared device fixture (CPU + CUDA-skipif)
 - `tests/unit/test_types.py` - 5 tests for foundation types
 - `tests/unit/test_transforms.py` - 8 tests for all transform functions
@@ -110,7 +110,7 @@ Each task was committed atomically:
 - **Found during:** Task 1 (pre-commit hook)
 - **Issue:** (a) `__all__` in `__init__.py` not sorted per RUF022; (b) ambiguous variable name `I` in transforms.py (E741)
 - **Fix:** Used `ruff check --fix` to auto-sort `__all__`; renamed `I` to `eye3` in rvec_to_matrix
-- **Files modified:** src/aquacore/__init__.py, src/aquacore/transforms.py
+- **Files modified:** src/aquakit/__init__.py, src/aquakit/transforms.py
 - **Verification:** `hatch run lint` passes cleanly
 - **Committed in:** 2398fb9 (Task 1 commit)
 

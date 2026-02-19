@@ -1,4 +1,4 @@
-"""AquaCore: refractive multi-camera geometry foundation for the Aqua ecosystem."""
+"""AquaKit: refractive multi-camera geometry foundation for the Aqua ecosystem."""
 
 from importlib.metadata import PackageNotFoundError, version
 

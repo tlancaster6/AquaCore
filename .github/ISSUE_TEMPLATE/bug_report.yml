@@ -33,7 +33,7 @@ body:
     id: package-version
     attributes:
       label: Package Version
-      description: Output of `python -c "import aquacore; print(aquacore.__version__)"`
+      description: Output of `python -c "import aquakit; print(aquakit.__version__)"`
       placeholder: e.g., 0.1.0
 
   - type: input

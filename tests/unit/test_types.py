@@ -1,9 +1,9 @@
-"""Tests for foundation types in aquacore.types."""
+"""Tests for foundation types in aquakit.types."""
 
 import torch
 import torch.testing
 
-from aquacore import (
+from aquakit import (
     INTERFACE_NORMAL,
     CameraExtrinsics,
     CameraIntrinsics,

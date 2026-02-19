@@ -17,7 +17,7 @@ class RefractiveProjectionModel:
     quantities (K_inv, camera center C, n_ratio) are precomputed at
     construction time to avoid repeated computation.
 
-    The coordinate system follows the AquaCore convention: world origin at
+    The coordinate system follows the AquaKit convention: world origin at
     reference camera optical center, +X right, +Y forward, +Z down into
     water. Extrinsics: ``p_cam = R @ p_world + t``.
 

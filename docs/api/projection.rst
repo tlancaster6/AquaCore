@@ -1,14 +1,14 @@
 Projection
 ==========
 
-.. automodule:: aquacore.projection
+.. automodule:: aquakit.projection
    :members:
    :undoc-members:
 
-.. automodule:: aquacore.projection.protocol
+.. automodule:: aquakit.projection.protocol
    :members:
    :undoc-members:
 
-.. automodule:: aquacore.projection.refractive
+.. automodule:: aquakit.projection.refractive
    :members:
    :undoc-members:

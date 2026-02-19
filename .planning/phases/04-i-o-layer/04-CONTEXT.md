@@ -34,7 +34,7 @@ Synchronized multi-camera frame access from video files and image directories vi
 - Internally converts all paths to `Path` objects
 - One video file per camera (no multi-camera-in-one-file support)
 - **Factory function** `create_frameset(camera_map)` auto-detects images vs video from paths and returns the appropriate concrete class
-- No CalibrationData coupling — camera-to-path mapping is established by consumer repos (AquaCal init, AquaMVS init), not AquaCore
+- No CalibrationData coupling — camera-to-path mapping is established by consumer repos (AquaCal init, AquaMVS init), not AquaKit
 
 ### Frame mismatch & errors
 - **Mismatched frame counts:** warn and use minimum count (not ValueError like AquaMVS)

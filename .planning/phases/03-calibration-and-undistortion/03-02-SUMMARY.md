@@ -29,10 +29,10 @@ tech-stack:
 
 key-files:
   created:
-    - src/aquacore/undistortion.py
+    - src/aquakit/undistortion.py
     - tests/unit/test_undistortion.py
   modified:
-    - src/aquacore/__init__.py
+    - src/aquakit/__init__.py
 
 key-decisions:
   - "Return raw (map_x, map_y) NumPy tuple from compute_undistortion_maps -- no UndistortionData wrapper (user decision from plan)"
@@ -64,7 +64,7 @@ completed: 2026-02-18
 
 - Implemented compute_undistortion_maps dispatching to cv2.fisheye.initUndistortRectifyMap or cv2.initUndistortRectifyMap based on is_fisheye flag
 - Implemented undistort_image with PyTorch tensor in/out, internal OpenCV boundary via cpu().numpy() / torch.from_numpy().to(device)
-- Both functions exported from aquacore top-level __init__.py
+- Both functions exported from aquakit top-level __init__.py
 - 13 tests: maps shape (H, W), dtype float32, validity (no NaN/inf, values in range), tensor dtype/shape/device preservation, grayscale support, identity distortion verification, and full pinhole/fisheye round-trips
 
 ## Task Commits
@@ -78,8 +78,8 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `src/aquacore/undistortion.py` - compute_undistortion_maps with pinhole/fisheye dispatch; undistort_image with PyTorch-OpenCV boundary
-- `src/aquacore/__init__.py` - Added compute_undistortion_maps and undistort_image to imports and __all__
+- `src/aquakit/undistortion.py` - compute_undistortion_maps with pinhole/fisheye dispatch; undistort_image with PyTorch-OpenCV boundary
+- `src/aquakit/__init__.py` - Added compute_undistortion_maps and undistort_image to imports and __all__
 - `tests/unit/test_undistortion.py` - 13 tests across two fixtures (pinhole_camera, fisheye_camera); all pass
 
 ## Decisions Made
@@ -110,9 +110,9 @@ None - no external service configuration required.
 ## Self-Check: PASSED
 
 Files verified:
-- FOUND: src/aquacore/undistortion.py
+- FOUND: src/aquakit/undistortion.py
 - FOUND: tests/unit/test_undistortion.py
-- FOUND: src/aquacore/__init__.py
+- FOUND: src/aquakit/__init__.py
 - FOUND: .planning/phases/03-calibration-and-undistortion/03-02-SUMMARY.md
 
 Commits verified:

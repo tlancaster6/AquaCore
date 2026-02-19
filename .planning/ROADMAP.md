@@ -1,8 +1,8 @@
-# Roadmap: AquaCore
+# Roadmap: AquaKit
 
 ## Overview
 
-AquaCore is built in five phases that follow the natural dependency pyramid of the library. Phase 1 establishes every foundation type and all physics math — the dependency root that all subsequent layers require. Phase 2 builds the ProjectionModel protocol and the Newton-Raphson refractive back-projection on top of that physics. Phase 3 adds the AquaCal JSON calibration loader and undistortion, which depends on stable camera models and the projection model. Phase 4 builds the synchronized I/O layer using the calibration types from Phase 3. Phase 5 wires CI, publishing, and the rewiring guide — the release-readiness work that spans the whole codebase.
+AquaKit is built in five phases that follow the natural dependency pyramid of the library. Phase 1 establishes every foundation type and all physics math — the dependency root that all subsequent layers require. Phase 2 builds the ProjectionModel protocol and the Newton-Raphson refractive back-projection on top of that physics. Phase 3 adds the AquaCal JSON calibration loader and undistortion, which depends on stable camera models and the projection model. Phase 4 builds the synchronized I/O layer using the calibration types from Phase 3. Phase 5 wires CI, publishing, and the rewiring guide — the release-readiness work that spans the whole codebase.
 
 ## Phases
 
@@ -25,7 +25,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Depends on**: Nothing (first phase)
 **Requirements**: TYPE-01, TYPE-02, TYPE-03, TYPE-04, TYPE-05, CAM-01, CAM-02, CAM-03, CAM-04, CAM-05, CAM-06, REF-01, REF-02, REF-03, REF-04, REF-05, REF-06, REF-07, TRN-01, TRN-02, TRN-03, TRN-04, TRI-01, TRI-02, TRI-03, QA-01, QA-02
 **Success Criteria** (what must be TRUE):
-  1. User can import CameraIntrinsics, CameraExtrinsics, InterfaceParams, Vec2, Vec3, Mat3 from aquacore and construct instances with typed fields
+  1. User can import CameraIntrinsics, CameraExtrinsics, InterfaceParams, Vec2, Vec3, Mat3 from aquakit and construct instances with typed fields
   2. User can create a pinhole Camera or FisheyeCamera via create_camera() and round-trip project → back-project a 3D point to within 1e-5 pixel on both CPU and CUDA
   3. User can call snells_law_3d with a ray and interface normal and get a correctly refracted ray satisfying Snell's law (verified against known sin-ratio values); total internal reflection returns a flag, not NaN
   4. User can triangulate a 3D point from batched rays and the result matches a known ground-truth position; point-to-ray distance reports correct reprojection error
@@ -57,7 +57,7 @@ Plans:
 **Depends on**: Phase 2
 **Requirements**: CAL-01, CAL-02, CAL-03, CAL-04
 **Success Criteria** (what must be TRUE):
-  1. User can call load_calibration_data("path/to/aquacal.json") and get a CalibrationData object; aquacore is importable with AquaCal uninstalled
+  1. User can call load_calibration_data("path/to/aquacal.json") and get a CalibrationData object; aquakit is importable with AquaCal uninstalled
   2. CalibrationData.cameras returns a dict of CameraData objects; each CameraData exposes typed CameraIntrinsics, CameraExtrinsics, and InterfaceParams fields
   3. User can call compute_undistortion_maps(camera_data, image_size) and get a map pair usable with cv2.remap; maps are on the correct device
   4. User can call undistort_image(image, maps) and get an undistorted image tensor matching the source image shape
@@ -88,8 +88,8 @@ Plans:
 **Requirements**: QA-03, QA-04, QA-05
 **Success Criteria** (what must be TRUE):
   1. Every push triggers a GitHub Actions workflow that runs ruff lint, basedpyright typecheck, and pytest on all supported platforms and Python versions; failures block merge
-  2. A version tag triggers the PyPI trusted publishing workflow and the package appears on PyPI installable via pip install aquacore
-  3. The rewiring guide lists every old AquaCal/AquaMVS import alongside its replacement aquacore import; a developer can migrate a file by find-and-replace using the table
+  2. A version tag triggers the PyPI trusted publishing workflow and the package appears on PyPI installable via pip install aquakit
+  3. The rewiring guide lists every old AquaCal/AquaMVS import alongside its replacement aquakit import; a developer can migrate a file by find-and-replace using the table
 **Plans:** 3 plans
 
 Plans:

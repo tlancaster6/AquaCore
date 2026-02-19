@@ -11,7 +11,7 @@ import math
 
 import torch
 
-from aquacore import (
+from aquakit import (
     InterfaceParams,
     refractive_back_project,
     refractive_project,
@@ -19,7 +19,7 @@ from aquacore import (
     trace_ray_air_to_water,
     trace_ray_water_to_air,
 )
-from aquacore.types import INTERFACE_NORMAL
+from aquakit.types import INTERFACE_NORMAL
 
 # ---------------------------------------------------------------------------
 # Helper: build a standard air-water interface at z=0

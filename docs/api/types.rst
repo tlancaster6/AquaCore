@@ -1,6 +1,6 @@
 Types
 =====
 
-.. automodule:: aquacore.types
+.. automodule:: aquakit.types
    :members:
    :undoc-members:

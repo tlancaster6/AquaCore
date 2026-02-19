@@ -1,4 +1,4 @@
-"""Shared pytest fixtures for all AquaCore tests."""
+"""Shared pytest fixtures for all AquaKit tests."""
 
 import pytest
 import torch

@@ -86,7 +86,7 @@ The undistortion pipeline is a near-verbatim port of AquaMVS's `compute_undistor
 
 | Instead of | Could Use | Tradeoff |
 |------------|-----------|----------|
-| `warnings` module | Python `logging` module | `warnings` requires no caller setup; emits once-per-location by default; appropriate for data quality warnings during loading. `logging` is better for applications. Since AquaCore is a library, `warnings` is the standard choice. |
+| `warnings` module | Python `logging` module | `warnings` requires no caller setup; emits once-per-location by default; appropriate for data quality warnings during loading. `logging` is better for applications. Since AquaKit is a library, `warnings` is the standard choice. |
 | json.load() direct | pydantic, marshmallow, jsonschema | Zero extra dependencies; the schema is small enough that manual validation is readable. Pydantic would add a dependency and boilerplate. The AquaMVS reference uses no schema library. |
 | Return (map_x, map_y) tuple | `UndistortionData` dataclass | Tuple is simpler; no wrapper needed since Phase 3 decision explicitly rejects the wrapper. AquaMVS's `UndistortionData` also carries `K_new` — but the decision here omits K_new from the return value. |
 
@@ -101,14 +101,14 @@ The undistortion pipeline is a near-verbatim port of AquaMVS's `compute_undistor
 Phase 3 fills exactly two stubs:
 
 ```
-src/aquacore/
+src/aquakit/
 ├── calibration.py       # CameraData, CalibrationData, load_calibration_data()
 └── undistortion.py      # compute_undistortion_maps(), undistort_image()
 ```
 
 ### Pattern 1: CameraData Composes Phase 1 Types
 
-**What:** `CameraData` is a `@dataclass` that stores `intrinsics: CameraIntrinsics` and `extrinsics: CameraExtrinsics` instead of raw K, R, t tensors. This is the key AquaCore divergence from AquaMVS, which stored raw tensors directly on `CameraData`.
+**What:** `CameraData` is a `@dataclass` that stores `intrinsics: CameraIntrinsics` and `extrinsics: CameraExtrinsics` instead of raw K, R, t tensors. This is the key AquaKit divergence from AquaMVS, which stored raw tensors directly on `CameraData`.
 
 **When to use:** Always — this is the locked design decision.
 
@@ -139,7 +139,7 @@ class CameraData:
 
 **What:** `CalibrationData` stores `interface: InterfaceParams` (Phase 1 type) rather than flat `interface_normal`, `n_air`, `n_water` fields. Adds `water_z: float` as a global rig property.
 
-**Note on water_z:** AquaCal stores `water_z` per-camera (in `CameraCalibration.water_z`). AquaMVS reads `next(iter(result.cameras.values())).water_z` to get the global value. AquaCore's decision follows the same approach — extract a single `water_z` from the first valid camera entry during loading.
+**Note on water_z:** AquaCal stores `water_z` per-camera (in `CameraCalibration.water_z`). AquaMVS reads `next(iter(result.cameras.values())).water_z` to get the global value. AquaKit's decision follows the same approach — extract a single `water_z` from the first valid camera entry during loading.
 
 ```python
 # Source: types.py (Phase 1 InterfaceParams) + this phase's design
@@ -312,7 +312,7 @@ def compute_undistortion_maps(
 
 **What:** Accepts a PyTorch tensor, converts to NumPy for `cv2.remap`, converts result back to PyTorch tensor on the original device.
 
-**Tensor format:** AquaCore images are `(H, W, 3)` uint8 BGR (OpenCV convention) or `(H, W)` float32 grayscale. `cv2.remap` handles both. The function preserves dtype and shape.
+**Tensor format:** AquaKit images are `(H, W, 3)` uint8 BGR (OpenCV convention) or `(H, W)` float32 grayscale. `cv2.remap` handles both. The function preserves dtype and shape.
 
 **Device handling:** The image tensor may be on CUDA. Convert with `.cpu().numpy()` before cv2, then use `torch.from_numpy(...).to(device)` after.
 
@@ -341,7 +341,7 @@ def undistort_image(
 ### Recommended Project Structure
 
 ```
-src/aquacore/
+src/aquakit/
 ├── calibration.py       # CameraData, CalibrationData, load_calibration_data()
 │                        # Imports: json, warnings, pathlib, numpy, torch, types.py
 └── undistortion.py      # compute_undistortion_maps(), undistort_image()
@@ -350,10 +350,10 @@ src/aquacore/
 
 ### Anti-Patterns to Avoid
 
-- **Importing from aquacal:** AquaCore must be importable without AquaCal installed. Parse JSON directly with `json.load()`. Never `from aquacal.io.serialization import load_calibration`.
+- **Importing from aquacal:** AquaKit must be importable without AquaCal installed. Parse JSON directly with `json.load()`. Never `from aquacal.io.serialization import load_calibration`.
 - **Storing raw tensors on CameraData instead of composing types:** `CameraData` must hold `intrinsics: CameraIntrinsics` and `extrinsics: CameraExtrinsics` — not flat K, R, t fields. This enables `create_camera(camera_data.intrinsics, camera_data.extrinsics)` seamlessly.
 - **Failing entire load on one bad camera:** The decision is to skip bad camera entries with a warning. Do not raise on per-camera parsing failures.
-- **Not normalizing t shape:** AquaCal can produce `t` as `[[tx], [ty], [tz]]`. If AquaCore fails on this, existing AquaCal JSON files will break silently.
+- **Not normalizing t shape:** AquaCal can produce `t` as `[[tx], [ty], [tz]]`. If AquaKit fails on this, existing AquaCal JSON files will break silently.
 - **Not reshaping dist_coeffs for fisheye:** `cv2.fisheye.initUndistortRectifyMap` requires `D` as shape `(4, 1)`, not `(4,)`. Passing `(4,)` raises an OpenCV error.
 - **Wrapping maps in a dataclass:** The decision explicitly rejects an `UndistortionData` wrapper. Return a plain `(map_x, map_y)` tuple.
 - **Moving image to device inside undistort_image before remap:** cv2.remap requires NumPy on CPU. The pattern is `.detach().cpu().numpy()` before remap, then `.to(device)` after.
@@ -387,13 +387,13 @@ src/aquacore/
 
 ### Pitfall 2: AquaCal Import at Module Level
 
-**What goes wrong:** `import aquacore` raises `ModuleNotFoundError: No module named 'aquacal'` even when user has not installed AquaCal.
+**What goes wrong:** `import aquakit` raises `ModuleNotFoundError: No module named 'aquacal'` even when user has not installed AquaCal.
 
-**Why it happens:** A module-level import of AquaCal (e.g., `from aquacal.io.serialization import load_calibration`) runs when the `aquacore` package is imported, regardless of whether the calibration functions are called.
+**Why it happens:** A module-level import of AquaCal (e.g., `from aquacal.io.serialization import load_calibration`) runs when the `aquakit` package is imported, regardless of whether the calibration functions are called.
 
-**How to avoid:** Parse JSON directly with `json.load()` — zero AquaCal imports. Never import AquaCal anywhere in AquaCore.
+**How to avoid:** Parse JSON directly with `json.load()` — zero AquaCal imports. Never import AquaCal anywhere in AquaKit.
 
-**Warning signs:** AquaCore test suite fails in CI unless AquaCal is also installed. This violates the phase success criterion that "aquacore is importable with AquaCal uninstalled."
+**Warning signs:** AquaKit test suite fails in CI unless AquaCal is also installed. This violates the phase success criterion that "aquakit is importable with AquaCal uninstalled."
 
 ### Pitfall 3: Failing Loudly on Per-Camera Missing Fields
 
@@ -429,7 +429,7 @@ src/aquacore/
 
 **What goes wrong:** `cv2.initUndistortRectifyMap(..., imageSize, ...)` expects `(width, height)` but many NumPy/PyTorch shapes are `(height, width)`. Passing the wrong order produces transposed maps.
 
-**Why it happens:** AquaCore's `CameraIntrinsics.image_size` stores `(width, height)` per project convention. NumPy arrays are `(H, W, ...)`. Confusing the two is easy.
+**Why it happens:** AquaKit's `CameraIntrinsics.image_size` stores `(width, height)` per project convention. NumPy arrays are `(H, W, ...)`. Confusing the two is easy.
 
 **How to avoid:** Pass `camera_data.intrinsics.image_size` directly to `imageSize` arguments — it is already in `(width, height)` order, which is what OpenCV expects. Never derive image_size from a numpy array's `.shape` (which gives H, W).
 
@@ -488,7 +488,7 @@ Verified patterns from AquaMVS and AquaCal source code:
 
 **Optional fields (ignore silently):** `board`, `diagnostics`, `metadata`, `is_fisheye` (default False), `is_auxiliary` (default False).
 
-**Backward compatibility field:** `interface_distance` is an old name for `water_z` in camera entries. AquaCal's own deserializer handles this (see `_deserialize_camera_calibration()`). AquaCore should handle it too for legacy files.
+**Backward compatibility field:** `interface_distance` is an old name for `water_z` in camera entries. AquaCal's own deserializer handles this (see `_deserialize_camera_calibration()`). AquaKit should handle it too for legacy files.
 
 ### Parsing a Camera Entry
 
@@ -637,7 +637,7 @@ def undistort_image(
 ```python
 # Pattern: construct minimal dict input to test loading without file I/O
 import torch
-from aquacore.calibration import load_calibration_data
+from aquakit.calibration import load_calibration_data
 
 MINIMAL_CALIBRATION_DICT = {
     "version": "1.0",
@@ -693,16 +693,16 @@ def test_undistortion_maps_shape(device):
 
 | Old Approach | Current Approach | When Changed | Impact |
 |--------------|------------------|--------------|--------|
-| AquaMVS: import from aquacal.io.serialization | AquaCore: json.load() direct parse | Phase 3 (this phase) | AquaCore importable without AquaCal installed |
-| AquaMVS: CameraData with flat K, R, t tensors | AquaCore: CameraData with intrinsics/extrinsics typed objects | Phase 3 (this phase) | `create_camera(cam.intrinsics, cam.extrinsics)` works directly |
-| AquaMVS: UndistortionData dataclass with K_new | AquaCore: plain (map_x, map_y) tuple | Phase 3 (this phase) | Simpler API; K_new dropped since maps already encode the new camera matrix |
-| AquaMVS: undistort_image() takes np.ndarray | AquaCore: undistort_image() takes torch.Tensor | Phase 3 (this phase) | Consistent with project convention; NumPy conversion happens internally |
-| AquaMVS: ring_cameras() method | AquaCore: core_cameras() method | Phase 3 (this phase) | Term "ring cameras" is AquaMVS-specific; AquaCore uses "core cameras" |
-| AquaMVS: camera_positions() method | Not in AquaCore CalibrationData | Phase 3 — omitted | CameraExtrinsics.C property covers this; no need to duplicate on CalibrationData |
+| AquaMVS: import from aquacal.io.serialization | AquaKit: json.load() direct parse | Phase 3 (this phase) | AquaKit importable without AquaCal installed |
+| AquaMVS: CameraData with flat K, R, t tensors | AquaKit: CameraData with intrinsics/extrinsics typed objects | Phase 3 (this phase) | `create_camera(cam.intrinsics, cam.extrinsics)` works directly |
+| AquaMVS: UndistortionData dataclass with K_new | AquaKit: plain (map_x, map_y) tuple | Phase 3 (this phase) | Simpler API; K_new dropped since maps already encode the new camera matrix |
+| AquaMVS: undistort_image() takes np.ndarray | AquaKit: undistort_image() takes torch.Tensor | Phase 3 (this phase) | Consistent with project convention; NumPy conversion happens internally |
+| AquaMVS: ring_cameras() method | AquaKit: core_cameras() method | Phase 3 (this phase) | Term "ring cameras" is AquaMVS-specific; AquaKit uses "core cameras" |
+| AquaMVS: camera_positions() method | Not in AquaKit CalibrationData | Phase 3 — omitted | CameraExtrinsics.C property covers this; no need to duplicate on CalibrationData |
 
 **Deprecated/outdated:**
-- `UndistortionData` wrapper class: AquaMVS uses it; AquaCore drops it. Consumers that need `K_new` must recompute it separately.
-- `ring_cameras()` method name: AquaMVS calls non-auxiliary cameras "ring cameras". AquaCore calls them "core cameras". Rewiring guide must document this rename.
+- `UndistortionData` wrapper class: AquaMVS uses it; AquaKit drops it. Consumers that need `K_new` must recompute it separately.
+- `ring_cameras()` method name: AquaMVS calls non-auxiliary cameras "ring cameras". AquaKit calls them "core cameras". Rewiring guide must document this rename.
 
 ---
 
@@ -715,7 +715,7 @@ def test_undistortion_maps_shape(device):
 
 2. **camera_list ordering**
    - What we know: Claude's discretion — could be insertion order from JSON or alphabetical.
-   - What's unclear: JSON dict insertion order is preserved in Python 3.7+ (and AquaCore requires Python 3.11+). Alphabetical sorting is more deterministic across serialization libraries.
+   - What's unclear: JSON dict insertion order is preserved in Python 3.7+ (and AquaKit requires Python 3.11+). Alphabetical sorting is more deterministic across serialization libraries.
    - Recommendation: Use insertion order from JSON for `camera_list` (return `list(self.cameras.values())`). This preserves the original file's camera ordering, which may be meaningful (e.g., cameras are indexed). Document this. If alphabetical is needed, `sorted(self.cameras.values(), key=lambda c: c.name)` is easy.
 
 3. **Should undistortion.py import from calibration.py?**
@@ -732,18 +732,18 @@ def test_undistortion_maps_shape(device):
 - `C:/Users/tucke/PycharmProjects/AquaMVS/src/aquamvs/calibration.py` — Complete reference implementation: CameraData, CalibrationData, UndistortionData, load_calibration_data(), compute_undistortion_maps(), undistort_image()
 - `C:/Users/tucke/PycharmProjects/AquaCal/src/aquacal/io/serialization.py` — AquaCal JSON serialization: exact schema structure, field names, backward-compat `interface_distance`, version constant "1.0"
 - `C:/Users/tucke/PycharmProjects/AquaCal/src/aquacal/config/schema.py` — AquaCal type definitions: CameraCalibration.water_z placement, InterfaceParams fields (no water_z!), CameraIntrinsics/CameraExtrinsics shapes
-- `C:/Users/tucke/PycharmProjects/AquaCore/src/aquacore/types.py` — Phase 1 types: CameraIntrinsics, CameraExtrinsics, InterfaceParams field definitions — what CameraData must compose
-- `C:/Users/tucke/PycharmProjects/AquaCore/src/aquacore/camera.py` — OpenCV boundary pattern: `_to_numpy()`, `detach().cpu().numpy()`, `torch.from_numpy().to(device)`
-- `C:/Users/tucke/PycharmProjects/AquaCore/src/aquacore/__init__.py` — Current public API; needs to be updated to export CameraData, CalibrationData, load_calibration_data, compute_undistortion_maps, undistort_image
-- `C:/Users/tucke/PycharmProjects/AquaCore/pyproject.toml` — Dependencies (torch via hatch env, numpy>=1.24, opencv-python>=4.8); no new deps needed
-- `C:/Users/tucke/PycharmProjects/AquaCore/tests/conftest.py` — Device fixture: `cpu` + CUDA skipif; all tests should use this fixture
+- `C:/Users/tucke/PycharmProjects/AquaKit/src/aquakit/types.py` — Phase 1 types: CameraIntrinsics, CameraExtrinsics, InterfaceParams field definitions — what CameraData must compose
+- `C:/Users/tucke/PycharmProjects/AquaKit/src/aquakit/camera.py` — OpenCV boundary pattern: `_to_numpy()`, `detach().cpu().numpy()`, `torch.from_numpy().to(device)`
+- `C:/Users/tucke/PycharmProjects/AquaKit/src/aquakit/__init__.py` — Current public API; needs to be updated to export CameraData, CalibrationData, load_calibration_data, compute_undistortion_maps, undistort_image
+- `C:/Users/tucke/PycharmProjects/AquaKit/pyproject.toml` — Dependencies (torch via hatch env, numpy>=1.24, opencv-python>=4.8); no new deps needed
+- `C:/Users/tucke/PycharmProjects/AquaKit/tests/conftest.py` — Device fixture: `cpu` + CUDA skipif; all tests should use this fixture
 
 ### Secondary (MEDIUM confidence)
 
-- `C:/Users/tucke/PycharmProjects/AquaCore/.planning/research/aquamvs-map.md` — Pre-mapped AquaMVS architecture; used for navigation
-- `C:/Users/tucke/PycharmProjects/AquaCore/.planning/research/aquacal-map.md` — Pre-mapped AquaCal architecture; calibration I/O section
-- `C:/Users/tucke/PycharmProjects/AquaCore/.planning/research/shared-patterns.md` — Cross-repo consistency notes; translation table for AquaCal → AquaMVS field types
-- `C:/Users/tucke/PycharmProjects/AquaCore/.planning/phases/02-projection-protocol/02-VERIFICATION.md` — Phase 2 verification: confirmed test patterns, device parametrization, torch.testing.assert_close
+- `C:/Users/tucke/PycharmProjects/AquaKit/.planning/research/aquamvs-map.md` — Pre-mapped AquaMVS architecture; used for navigation
+- `C:/Users/tucke/PycharmProjects/AquaKit/.planning/research/aquacal-map.md` — Pre-mapped AquaCal architecture; calibration I/O section
+- `C:/Users/tucke/PycharmProjects/AquaKit/.planning/research/shared-patterns.md` — Cross-repo consistency notes; translation table for AquaCal → AquaMVS field types
+- `C:/Users/tucke/PycharmProjects/AquaKit/.planning/phases/02-projection-protocol/02-VERIFICATION.md` — Phase 2 verification: confirmed test patterns, device parametrization, torch.testing.assert_close
 
 ---
 

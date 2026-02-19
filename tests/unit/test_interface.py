@@ -1,9 +1,9 @@
-"""Tests for ray-plane intersection in aquacore.interface."""
+"""Tests for ray-plane intersection in aquakit.interface."""
 
 import torch
 import torch.testing
 
-from aquacore import ray_plane_intersection
+from aquakit import ray_plane_intersection
 
 
 def test_ray_hits_plane(device: torch.device) -> None:

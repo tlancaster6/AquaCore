@@ -30,10 +30,10 @@ tech-stack:
 
 key-files:
   created:
-    - src/aquacore/calibration.py
+    - src/aquakit/calibration.py
     - tests/unit/test_calibration.py
   modified:
-    - src/aquacore/__init__.py
+    - src/aquakit/__init__.py
 
 key-decisions:
   - "water_z stored in InterfaceParams (not separate field on CalibrationData) - consistent with Phase 1 types"
@@ -78,15 +78,15 @@ Each task was committed atomically:
 
 ## Files Created/Modified
 
-- `src/aquacore/calibration.py` - CameraData, CalibrationData dataclasses and load_calibration_data function; no AquaCal imports
-- `src/aquacore/__init__.py` - Added CalibrationData, CameraData, load_calibration_data to imports and __all__
+- `src/aquakit/calibration.py` - CameraData, CalibrationData dataclasses and load_calibration_data function; no AquaCal imports
+- `src/aquakit/__init__.py` - Added CalibrationData, CameraData, load_calibration_data to imports and __all__
 - `tests/unit/test_calibration.py` - 25 tests using synthetic JSON fixtures; all pass
 
 ## Decisions Made
 
 - water_z lives in InterfaceParams (not a separate CalibrationData field) - consistent with Phase 1 type design where InterfaceParams already owns water_z
 - Per-camera validation skips bad cameras with warning rather than crashing - real-world calibration files sometimes have partial data; resilient loading is safer
-- No AquaCal dependency - only json, warnings, torch, pathlib; aquacore stays importable with AquaCal uninstalled
+- No AquaCal dependency - only json, warnings, torch, pathlib; aquakit stays importable with AquaCal uninstalled
 
 ## Deviations from Plan
 
@@ -106,9 +106,9 @@ None - plan executed exactly as written. Lint auto-fixes applied by pre-commit h
 ## Self-Check: PASSED
 
 Files verified:
-- FOUND: src/aquacore/calibration.py
+- FOUND: src/aquakit/calibration.py
 - FOUND: tests/unit/test_calibration.py
-- FOUND: src/aquacore/__init__.py
+- FOUND: src/aquakit/__init__.py
 - FOUND: .planning/phases/03-calibration-and-undistortion/03-01-SUMMARY.md
 
 Commits verified:

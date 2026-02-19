@@ -71,7 +71,7 @@ The canonical structure for a PyTorch-first geometry foundation library is a str
 ## Recommended Project Structure
 
 ```
-src/aquacore/
+src/aquakit/
 ├── types.py              # Foundation: all shared types, no math
 ├── interface.py          # Air-water plane geometry (depends: types)
 ├── camera.py             # Camera models (depends: types)
@@ -257,7 +257,7 @@ Consumer (AquaMVS, AquaPose) moves tensor to target device
 Components must be built in dependency order. Building out-of-order creates circular import risk and requires stubs.
 
 ```
-Layer 0 — Foundation (no aquacore deps)
+Layer 0 — Foundation (no aquakit deps)
 ├── types.py
 └── interface.py
 
@@ -328,7 +328,7 @@ Layer 5 — I/O (depends on Layers 0–4)
 
 **What people do:** Hardcode `[0, 0, -1]` as the interface normal inside refraction math without documenting the coordinate convention.
 
-**Why it's wrong:** AquaCore's coordinate system has +Z pointing down into water, so the upward normal is `[0, 0, -1]`. This is non-obvious. Undocumented constants cause sign errors when consumers work in other conventions.
+**Why it's wrong:** AquaKit's coordinate system has +Z pointing down into water, so the upward normal is `[0, 0, -1]`. This is non-obvious. Undocumented constants cause sign errors when consumers work in other conventions.
 
 **Do this instead:** Define `INTERFACE_NORMAL_DEFAULT` as a named constant in `interface.py` with an explicit docstring referencing the coordinate system.
 
@@ -377,5 +377,5 @@ This is a library, not a service. "Scaling" means handling larger batches and mo
 - Refractive camera model self-calibration structure (LOW confidence): [NTNU Refractive Camera Model](https://ntnu-arl.github.io/refractive-camera-model/) — distortion model + virtual pinhole model separation
 
 ---
-*Architecture research for: Refractive multi-camera geometry foundation library (AquaCore)*
+*Architecture research for: Refractive multi-camera geometry foundation library (AquaKit)*
 *Researched: 2026-02-18*
